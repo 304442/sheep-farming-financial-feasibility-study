@@ -612,6 +612,22 @@
             transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
+        /* Alert Info */
+        .alert-info {
+            background: #e8f4f8;
+            border: 1px solid #b8e0ea;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 12px;
+            font-size: 14px;
+            color: #0c5460;
+        }
+        
+        .alert-info p {
+            margin: 0;
+            text-align: center;
+        }
+        
         /* Loading State */
         .skeleton {
             background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
@@ -745,6 +761,41 @@
         <div class="content-area" id="contentArea">
             <!-- Market Research Section -->
             <div class="section-page active" id="market">
+                <!-- Quick Stats Dashboard -->
+                <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-bottom: 16px;">
+                    <div class="card-header">
+                        <h2 class="card-title" style="color: white;">
+                            <span class="card-icon">🎯</span>
+                            ملخص سريع
+                        </h2>
+                    </div>
+                    
+                    <div class="stats-grid" style="gap: 8px;">
+                        <div class="stat-card" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px);">
+                            <div class="stat-value" id="quickROI">0%</div>
+                            <div class="stat-label" style="opacity: 1;">العائد المتوقع</div>
+                        </div>
+                        <div class="stat-card" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px);">
+                            <div class="stat-value" id="quickBreakEven">0</div>
+                            <div class="stat-label" style="opacity: 1;">شهور للتعادل</div>
+                        </div>
+                        <div class="stat-card" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px);">
+                            <div class="stat-value" id="quickProfit">0</div>
+                            <div class="stat-label" style="opacity: 1;">الربح السنوي</div>
+                        </div>
+                        <div class="stat-card" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px);">
+                            <div class="stat-value" id="quickInvestment">0</div>
+                            <div class="stat-label" style="opacity: 1;">الاستثمار المطلوب</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.2);">
+                        <div style="text-align: center; font-size: 14px; opacity: 0.9;">
+                            <span id="projectStatus">قم بإدخال البيانات لحساب الجدوى</span>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="card">
                     <div class="card-header">
                         <h2 class="card-title">
@@ -791,6 +842,25 @@
                             <option value="mixed">مختلط</option>
                         </select>
                     </div>
+                    
+                    <div class="input-grid">
+                        <div class="input-field">
+                            <label class="input-label">عملاء الأضاحي المتوقعين</label>
+                            <input type="number" id="udheyaCustomers" value="100" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">عملاء اللحوم</label>
+                            <input type="number" id="meatCustomers" value="200" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">إجمالي الأسر بالمنطقة</label>
+                            <input type="number" id="totalFamilies" value="5000" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">نسبة الأضحية %</label>
+                            <input type="number" id="sacrificePercentage" value="70" inputmode="numeric">
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="card">
@@ -823,6 +893,70 @@
                     <div class="input-field">
                         <label class="input-label">سعر التصدير للخليج/خروف</label>
                         <input type="number" id="exportPrice" value="12000" inputmode="numeric">
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="card-icon">🏆</span>
+                            تحليل المنافسة
+                        </h2>
+                    </div>
+                    
+                    <div class="input-grid">
+                        <div class="input-field">
+                            <label class="input-label">عدد المنافسين</label>
+                            <input type="number" id="competitorCount" value="5" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">حجم قطيع المنافس</label>
+                            <input type="number" id="competitorFlockSize" value="100" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">سعر المنافس</label>
+                            <input type="number" id="competitorPrice" value="7500" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">ميزة تنافسية %</label>
+                            <input type="number" id="competitiveAdvantage" value="10" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">حصة السوق المستهدفة %</label>
+                            <input type="number" id="marketShare" value="15" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">نمو القوة الشرائية %</label>
+                            <input type="number" id="purchasingPowerGrowth" value="5" inputmode="numeric">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="card-icon">📊</span>
+                            الأسعار التاريخية
+                        </h2>
+                    </div>
+                    
+                    <div class="input-grid">
+                        <div class="input-field">
+                            <label class="input-label">سعر 2021</label>
+                            <input type="number" id="price2021" value="5500" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">سعر 2022</label>
+                            <input type="number" id="price2022" value="6500" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">سعر 2023</label>
+                            <input type="number" id="price2023" value="7500" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">نمو السكان %</label>
+                            <input type="number" id="populationGrowth" value="2.5" inputmode="numeric">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -891,6 +1025,42 @@
                         <div class="input-field">
                             <label class="input-label">أعلاف خشنة %</label>
                             <input type="number" id="roughageFeedPercent" value="30" inputmode="numeric">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="card-icon">🌱</span>
+                            أسعار مكونات الأعلاف
+                        </h2>
+                    </div>
+                    
+                    <div class="input-grid">
+                        <div class="input-field">
+                            <label class="input-label">البرسيم (جنيه/كجم)</label>
+                            <input type="number" id="alfalfaPrice" value="6" step="0.1" inputmode="decimal">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">الشعير (جنيه/كجم)</label>
+                            <input type="number" id="barleyPrice" value="7" step="0.1" inputmode="decimal">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">الذرة (جنيه/كجم)</label>
+                            <input type="number" id="cornPrice" value="8" step="0.1" inputmode="decimal">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">فول الصويا (جنيه/كجم)</label>
+                            <input type="number" id="soybeanPrice" value="12" step="0.1" inputmode="decimal">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">نخالة القمح (جنيه/كجم)</label>
+                            <input type="number" id="wheatBranPrice" value="5" step="0.1" inputmode="decimal">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">علف مركز (جنيه/كجم)</label>
+                            <input type="number" id="concentratePrice" value="10" step="0.1" inputmode="decimal">
                         </div>
                     </div>
                 </div>
@@ -1178,6 +1348,42 @@
                         </div>
                     </div>
                 </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="card-icon">📊</span>
+                            الطلب والمناسبات
+                        </h2>
+                    </div>
+                    
+                    <div class="input-grid">
+                        <div class="input-field">
+                            <label class="input-label">عدد الخراف لذبح اللحوم شهرياً</label>
+                            <input type="number" id="meatDemand" value="10" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">عدد الخراف الحية للبيع شهرياً</label>
+                            <input type="number" id="liveAnimalMonthly" value="5" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">عدد مناسبات الكاترينج شهرياً</label>
+                            <input type="number" id="cateringEvents" value="4" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">متوسط عدد الأشخاص/مناسبة</label>
+                            <input type="number" id="cateringPeople" value="50" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">عدد إيجارات المناسبات شهرياً</label>
+                            <input type="number" id="eventRentals" value="3" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">عدد الخراف للتصدير شهرياً</label>
+                            <input type="number" id="exportMonthly" value="5" inputmode="numeric">
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <!-- Breeding Program Section -->
@@ -1282,6 +1488,79 @@
                         </div>
                     </div>
                 </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="card-icon">📅</span>
+                            توقيت التزاوج
+                        </h2>
+                    </div>
+                    
+                    <div class="input-grid">
+                        <div class="input-field">
+                            <label class="input-label">موسم التزاوج الرئيسي</label>
+                            <select id="mainBreedingSeason">
+                                <option value="spring">الربيع</option>
+                                <option value="summer">الصيف</option>
+                                <option value="autumn" selected>الخريف</option>
+                                <option value="winter">الشتاء</option>
+                            </select>
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">بداية موسم التزاوج الأول</label>
+                            <input type="number" id="breeding1Start" value="9" min="1" max="12" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">بداية موسم التزاوج الثاني</label>
+                            <input type="number" id="breeding2Start" value="3" min="1" max="12" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">مدة موسم التزاوج (يوم)</label>
+                            <input type="number" id="breedingDuration" value="45" inputmode="numeric">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="card-icon">🧬</span>
+                            التحسين الوراثي
+                        </h2>
+                    </div>
+                    
+                    <div class="input-grid">
+                        <div class="input-field">
+                            <label class="input-label">نوع التلقيح</label>
+                            <select id="inseminationType">
+                                <option value="natural" selected>طبيعي</option>
+                                <option value="artificial">صناعي</option>
+                                <option value="mixed">مختلط</option>
+                            </select>
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">تكلفة التلقيح الصناعي</label>
+                            <input type="number" id="artificialInseminationCost" value="500" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">نسبة نجاح التلقيح %</label>
+                            <input type="number" id="inseminationSuccess" value="80" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">عدد الكباش المحسنة</label>
+                            <input type="number" id="improvedRamsCount" value="1" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">سعر الكبش المحسن</label>
+                            <input type="number" id="improvedRamCost" value="15000" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">زيادة الإنتاجية %</label>
+                            <input type="number" id="productivityIncrease" value="20" inputmode="numeric">
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <!-- Risks & Taxes Section -->
@@ -1362,6 +1641,164 @@
                         </label>
                     </div>
                 </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="card-icon">🦠</span>
+                            مخاطر الأمراض
+                        </h2>
+                    </div>
+                    
+                    <div class="input-grid">
+                        <div class="input-field">
+                            <label class="input-label">نوع المرض المحتمل</label>
+                            <select id="diseaseType">
+                                <option value="none">لا يوجد</option>
+                                <option value="footmouth">الحمى القلاعية</option>
+                                <option value="ppr">طاعون المجترات</option>
+                                <option value="enterotoxemia">التسمم المعوي</option>
+                                <option value="parasites">الطفيليات</option>
+                            </select>
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">معدل العدوى %</label>
+                            <input type="number" id="infectionRate" value="30" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">نسبة النفوق من المرض %</label>
+                            <input type="number" id="diseaseMortality" value="10" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">تكلفة العلاج/رأس</label>
+                            <input type="number" id="treatmentCost" value="200" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">مدة العلاج (يوم)</label>
+                            <input type="number" id="treatmentDuration" value="14" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">فقدان الوزن %</label>
+                            <input type="number" id="weightLoss" value="15" inputmode="numeric">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="card-icon">💰</span>
+                            الاحتياطيات المالية
+                        </h2>
+                    </div>
+                    
+                    <div class="input-grid">
+                        <div class="input-field">
+                            <label class="input-label">احتياطي نقدي (جنيه)</label>
+                            <input type="number" id="cashReserve" value="50000" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">احتياطي طوارئ صحية</label>
+                            <input type="number" id="healthEmergency" value="25000" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">تأمين ضد الكوارث</label>
+                            <input type="number" id="naturalDisasterInsurance" value="20000" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">احتياطي نقدي مطلوب %</label>
+                            <input type="number" id="requiredCashReserve" value="15" inputmode="numeric">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="card-icon">🏛️</span>
+                            رسوم إضافية
+                        </h2>
+                    </div>
+                    
+                    <div class="input-grid">
+                        <div class="input-field">
+                            <label class="input-label">رسوم بلدية سنوية</label>
+                            <input type="number" id="municipalFees" value="5000" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">رسوم غرفة تجارية</label>
+                            <input type="number" id="chamberFees" value="2000" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">اتحاد المنتجين</label>
+                            <input type="number" id="producerUnionFees" value="3000" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">منصات رقمية سنوية</label>
+                            <input type="number" id="onlinePlatformFees" value="24000" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">شهادة ISO 22000</label>
+                            <input type="number" id="isoCertificate" value="50000" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">شحن/رأس للتصدير</label>
+                            <input type="number" id="shippingPerHead" value="500" inputmode="numeric">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="card-icon">🌙</span>
+                            حساب الزكاة
+                        </h2>
+                    </div>
+                    
+                    <div class="input-grid">
+                        <div class="input-field">
+                            <label class="input-label">نصاب الزكاة (رأس)</label>
+                            <input type="number" id="zakatNisab" value="40" readonly>
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">الزكاة المستحقة (رأس)</label>
+                            <input type="number" id="zakatDue" value="0" readonly>
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">قيمة الزكاة (جنيه)</label>
+                            <input type="number" id="zakatValue" value="0" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="alert-info">
+                        <p>تحسب الزكاة على الأغنام إذا بلغت 40 رأسا بواقع شاة واحدة</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="card-icon">🌡️</span>
+                            مخاطر إضافية
+                        </h2>
+                    </div>
+                    
+                    <div class="input-grid">
+                        <div class="input-field">
+                            <label class="input-label">نفوق موجة الحر %</label>
+                            <input type="number" id="heatWaveMortality" value="8" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">انقطاع التوريد (يوم)</label>
+                            <input type="number" id="supplyInterruption" value="7" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">أنظمة تبريد</label>
+                            <input type="number" id="coolingSystems" value="25000" inputmode="numeric">
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <!-- Seasonal Analysis Section -->
@@ -1434,6 +1871,42 @@
             
             <!-- Financial Analysis Section -->
             <div class="section-page" id="financial">
+                <div class="card" id="quickSummary">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="card-icon">⚡</span>
+                            الملخص السريع
+                        </h2>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <div class="stat-value" id="quickInvestment">0</div>
+                            <div class="stat-label">إجمالي الاستثمار</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            <div class="stat-value" id="quickRevenue">0</div>
+                            <div class="stat-label">الإيرادات السنوية</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                            <div class="stat-value" id="quickProfit">0</div>
+                            <div class="stat-label">الربح السنوي</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                            <div class="stat-value" id="quickROI">0%</div>
+                            <div class="stat-label">العائد على الاستثمار</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                            <div class="stat-value" id="quickBreakeven">0</div>
+                            <div class="stat-label">نقطة التعادل (شهر)</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                            <div class="stat-value" id="quickMargin">0%</div>
+                            <div class="stat-label">هامش الربح</div>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="card">
                     <div class="card-header">
                         <h2 class="card-title">
@@ -1494,6 +1967,82 @@
                     
                     <div class="chart-container">
                         <canvas id="costBreakdownChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="card-icon">💰</span>
+                            تفاصيل الإيرادات
+                        </h2>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <div class="stat-value" id="udheyaRevenueDisplay">0</div>
+                            <div class="stat-label">إيرادات الأضاحي</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            <div class="stat-value" id="meatRevenueDisplay">0</div>
+                            <div class="stat-label">مبيعات اللحوم</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                            <div class="stat-value" id="liveRevenueDisplay">0</div>
+                            <div class="stat-label">الحيوانات الحية</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
+                            <div class="stat-value" id="cateringRevenueDisplay">0</div>
+                            <div class="stat-label">إيرادات الكاترينج</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                            <div class="stat-value" id="eventRentalRevenueDisplay">0</div>
+                            <div class="stat-label">إيرادات التأجير</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #f5af19 0%, #f12711 100%);">
+                            <div class="stat-value" id="exportRevenueDisplay">0</div>
+                            <div class="stat-label">إيرادات التصدير</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                            <div class="stat-value" id="othersRevenueDisplay">0</div>
+                            <div class="stat-label">إيرادات أخرى</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="card-icon">💳</span>
+                            شروط الدفع والائتمان
+                        </h2>
+                    </div>
+                    
+                    <div class="input-grid">
+                        <div class="input-field">
+                            <label class="input-label">عملاء نقدي %</label>
+                            <input type="number" id="cashCustomers" value="60" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">عملاء آجل %</label>
+                            <input type="number" id="creditCustomers" value="40" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">فترة التحصيل (يوم)</label>
+                            <input type="number" id="collectionPeriod" value="30" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">مبيعات أضحى عيد %</label>
+                            <input type="number" id="eidSales" value="70" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">مبيعات عادية %</label>
+                            <input type="number" id="nonEidSales" value="30" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">لحوم مميزة %</label>
+                            <input type="number" id="premiumMeat" value="20" inputmode="numeric">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2053,6 +2602,110 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Operational Tools Section -->
+            <div class="section-page" id="operationalTools">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="card-icon">🦠</span>
+                            محاكي انتشار الأمراض
+                        </h2>
+                    </div>
+                    
+                    <div class="input-grid">
+                        <div class="input-field">
+                            <label class="input-label">نوع المرض</label>
+                            <select id="diseaseType">
+                                <option value="fmd">الحمى القلاعية</option>
+                                <option value="ppr">طاعون المجترات</option>
+                                <option value="sheep_pox">جدري الأغنام</option>
+                                <option value="enterotoxemia">التسمم المعوي</option>
+                                <option value="pneumonia">الالتهاب الرئوي</option>
+                            </select>
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">معدل الإصابة %</label>
+                            <input type="number" id="infectionRate" value="30" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">معدل النفوق %</label>
+                            <input type="number" id="diseaseMortality" value="15" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">تكلفة العلاج/رأس</label>
+                            <input type="number" id="treatmentCost" value="500" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">فقدان الوزن %</label>
+                            <input type="number" id="weightLoss" value="20" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">مدة التعافي (يوم)</label>
+                            <input type="number" id="recoveryDays" value="21" inputmode="numeric">
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="simulateOutbreak()">
+                        <span>🔬</span>
+                        محاكاة الانتشار
+                    </button>
+                    
+                    <div id="outbreakResults" style="margin-top: 20px; display: none;">
+                        <!-- Results will be displayed here -->
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="card-icon">👥</span>
+                            جدولة العمالة
+                        </h2>
+                    </div>
+                    
+                    <div class="input-grid">
+                        <div class="input-field">
+                            <label class="input-label">عدد العمال الحاليين</label>
+                            <input type="number" id="currentWorkers" value="3" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">ساعات العمل/يوم</label>
+                            <input type="number" id="workHours" value="8" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">أيام العمل/أسبوع</label>
+                            <input type="number" id="workDays" value="6" inputmode="numeric">
+                        </div>
+                        <div class="input-field">
+                            <label class="input-label">رؤوس/عامل</label>
+                            <input type="number" id="sheepPerWorker" value="50" inputmode="numeric">
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-secondary" onclick="optimizeLaborSchedule()">
+                        <span>📊</span>
+                        تحسين الجدولة
+                    </button>
+                    
+                    <div id="laborResults" style="margin-top: 20px;">
+                        <!-- Labor optimization results -->
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="card-icon">📊</span>
+                            تحليل الأداء التشغيلي
+                        </h2>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <canvas id="operationalChart"></canvas>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <!-- Bottom Navigation -->
@@ -2154,6 +2807,10 @@
                         <span class="nav-icon">💱</span>
                         <span class="nav-label">محول العملات</span>
                     </button>
+                    <button class="nav-item" onclick="showSection('operationalTools'); hideBottomSheet('more')">
+                        <span class="nav-icon">🛠️</span>
+                        <span class="nav-label">أدوات تشغيلية</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -2183,7 +2840,7 @@
         let isInitialLoad = true;
         
         // Section order for swipe navigation
-        const sectionOrder = ['market', 'livestock', 'infrastructure', 'operations', 'breeding', 'risks', 'seasonal', 'financial', 'multiyear', 'feedOptimizer', 'breedingCalendar', 'sensitivity', 'marketIntel', 'compliance', 'currencyConverter'];
+        const sectionOrder = ['market', 'livestock', 'infrastructure', 'operations', 'breeding', 'risks', 'seasonal', 'financial', 'multiyear', 'feedOptimizer', 'breedingCalendar', 'sensitivity', 'marketIntel', 'compliance', 'currencyConverter', 'operationalTools'];
         
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
@@ -2346,6 +3003,7 @@
             if (sectionId === 'seasonal') {
                 createSeasonalCharts();
             } else if (sectionId === 'financial') {
+                createCharts();
                 createFinancialCharts();
                 updateCostBreakdownChart();
             } else if (sectionId === 'multiyear') {
@@ -2438,7 +3096,8 @@
                 const buildingsCost = inputs.coveredBarns + inputs.openBarns + inputs.birthingRooms + inputs.vetClinic;
                 const equipmentCost = inputs.waterSystem + inputs.feedingEquipment + inputs.feedStorage + 
                                     inputs.refrigerators + inputs.freezers + inputs.biogasSystem + 
-                                    inputs.waterRecycling + inputs.packagingEquipment + inputs.otherEquipment;
+                                    inputs.waterRecycling + inputs.packagingEquipment + inputs.otherEquipment +
+                                    inputs.coolingSystems;
                 const vehicleCost = inputs.vehicle + inputs.refrigeratedVehicle;
                 const techCost = inputs.website + inputs.mobileApp + inputs.paymentGateway + inputs.inventorySystem;
                 
@@ -2446,11 +3105,25 @@
                 const laborCost = (inputs.workers * inputs.workerSalary) + inputs.managerSalary;
                 const feedCostMonthly = totalAnimals * inputs.feedPerHead * 30 * inputs.feedPrice;
                 const vetCostMonthly = (totalAnimals * inputs.vaccinesPerHead / 12) + inputs.vetEmergency + inputs.vetCheckup;
+                // Processing costs
+                const monthlySlaughtered = (inputs.meatDemand || 10) + ((inputs.cateringEvents || 4) * 2); // Assuming 2 sheep per catering event
+                const slaughterCostMonthly = monthlySlaughtered * (inputs.slaughterFee || 100);
+                const processingCostMonthly = monthlySlaughtered * (inputs.processingFee || 150);
+                
+                const cateringStaffMonthly = (inputs.cateringStaffPerEvent || 1500) * (inputs.cateringEvents || 4);
+                
+                // Additional fees
+                const additionalFeesMonthly = (inputs.municipalFees / 12) + (inputs.chamberFees / 12) + 
+                                            (inputs.producerUnionFees / 12) + (inputs.onlinePlatformFees / 12) +
+                                            (inputs.isoCertificate / 12);
+                const exportCostsMonthly = (inputs.exportMonthly || 0) * (inputs.shippingPerHead || 500);
+                
                 const otherCostsMonthly = inputs.utilities + inputs.marketing + inputs.digitalMarketing + 
                                          (inputs.insurance / 12) + (inputs.licenses / 12) + 
                                          (inputs.halalCertificate / 12) + (inputs.qualityCertificates / 12) + 
                                          (inputs.rentCost || 0) + inputs.transportMonthly + 
-                                         inputs.packagingMonthly + inputs.deliveryCost;
+                                         inputs.packagingMonthly + inputs.deliveryCost + cateringStaffMonthly +
+                                         slaughterCostMonthly + processingCostMonthly + additionalFeesMonthly + exportCostsMonthly;
                 
                 const totalMonthlyCosts = laborCost + feedCostMonthly + vetCostMonthly + otherCostsMonthly;
                 const totalAnnualCosts = totalMonthlyCosts * 12;
@@ -2459,19 +3132,42 @@
                 const avgOffspring = inputs.ewes * inputs.fertilityRate / 100 * inputs.birthsPerYear * inputs.avgOffspring;
                 const maleOffspring = avgOffspring * inputs.maleRatio / 100;
                 
-                // Revenue streams
+                // Revenue streams using actual demand inputs
                 const udheyaRevenue = maleOffspring * 0.6 * inputs.udheyaPrice; // 60% sold as Udheya
-                const meatRevenue = maleOffspring * 0.3 * inputs.sellingWeight * 0.5 * inputs.meatPrice; // 30% for meat
-                const liveAnimalRevenue = maleOffspring * 0.1 * inputs.liveAnimalPrice; // 10% sold live
+                
+                // Use actual demand inputs for more accurate revenue calculation
+                const meatRevenue = (inputs.meatDemand || 10) * 12 * inputs.meatPrice * inputs.sellingWeight * 0.5; // Monthly demand * 12
+                const liveAnimalRevenue = (inputs.liveAnimalMonthly || 5) * 12 * inputs.liveAnimalPrice; // Monthly demand * 12
+                const cateringRevenue = (inputs.cateringEvents || 4) * 12 * (inputs.cateringPeople || 50) * inputs.cateringPrice; // Events * people * price
+                const eventRentalRevenue = (inputs.eventRentals || 3) * 12 * inputs.eventRentalPrice; // Monthly rentals * 12
+                const exportRevenue = (inputs.exportMonthly || 5) * 12 * inputs.exportPrice; // Monthly exports * 12
+                
                 const manureRevenue = totalAnimals * 0.5 * inputs.manurePrice; // 0.5 ton per animal per year
-                const hideRevenue = maleOffspring * 0.9 * inputs.hidePrice; // 90% of slaughtered animals
+                const hideRevenue = ((inputs.meatDemand || 10) * 12 * 0.8) * inputs.hidePrice; // 80% of slaughtered animals
                 
                 const totalAnnualRevenue = udheyaRevenue + meatRevenue + liveAnimalRevenue + 
+                                          cateringRevenue + eventRentalRevenue + exportRevenue +
                                           manureRevenue + hideRevenue;
                 
                 // Calculate profit and ROI
                 const totalInvestment = livestockCost + buildingsCost + equipmentCost + vehicleCost + techCost + landCost;
-                const annualProfit = totalAnnualRevenue - totalAnnualCosts;
+                let annualProfit = totalAnnualRevenue - totalAnnualCosts;
+                
+                // Calculate Zakat if enabled
+                let zakatAmount = 0;
+                if (inputs.calculateZakat) {
+                    const totalSheep = inputs.ewes + inputs.rams;
+                    const zakatDue = totalSheep >= 40 ? Math.floor(totalSheep / 40) : 0;
+                    zakatAmount = zakatDue * inputs.ewePrice; // Use ewe price as average sheep value
+                    
+                    // Update Zakat display fields
+                    document.getElementById('zakatDue').value = zakatDue;
+                    document.getElementById('zakatValue').value = zakatAmount;
+                    
+                    // Deduct Zakat from profit
+                    annualProfit -= zakatAmount;
+                }
+                
                 const roi = (annualProfit / totalInvestment) * 100;
                 const breakEvenMonths = totalInvestment / (annualProfit / 12);
                 
@@ -2492,7 +3188,16 @@
                     annualProfit,
                     roi,
                     breakEvenMonths,
-                    inputs
+                    inputs,
+                    revenueBreakdown: {
+                        udheya: udheyaRevenue,
+                        meat: meatRevenue,
+                        live: liveAnimalRevenue,
+                        catering: cateringRevenue,
+                        eventRental: eventRentalRevenue,
+                        export: exportRevenue,
+                        others: manureRevenue + hideRevenue
+                    }
                 };
                 
                 // Update multi-year projections if on that tab
@@ -2571,12 +3276,46 @@
                 return new Intl.NumberFormat('ar-EG').format(Math.round(num));
             };
             
-            // Update stats
+            // Update main financial stats
             document.getElementById('totalInvestment').textContent = formatNumber(investment);
             document.getElementById('annualRevenue').textContent = formatNumber(revenue);
             document.getElementById('annualProfit').textContent = formatNumber(profit);
             document.getElementById('roi').textContent = roi.toFixed(1) + '%';
             document.getElementById('breakEvenMonths').textContent = Math.ceil(breakeven);
+            
+            // Update quick stats dashboard
+            document.getElementById('quickROI').textContent = roi.toFixed(1) + '%';
+            document.getElementById('quickBreakEven').textContent = Math.ceil(breakeven);
+            document.getElementById('quickProfit').textContent = Math.round(profit / 1000) + 'k';
+            document.getElementById('quickInvestment').textContent = Math.round(investment / 1000) + 'k';
+            
+            // Update project status
+            const statusElement = document.getElementById('projectStatus');
+            if (roi > 30) {
+                statusElement.textContent = '🎉 مشروع ممتاز - عائد مرتفع';
+                statusElement.style.color = '#2ecc71';
+            } else if (roi > 20) {
+                statusElement.textContent = '✅ مشروع جيد - عائد مقبول';
+                statusElement.style.color = '#3498db';
+            } else if (roi > 10) {
+                statusElement.textContent = '⚠️ مشروع متوسط - يحتاج دراسة';
+                statusElement.style.color = '#f39c12';
+            } else {
+                statusElement.textContent = '❌ مشروع ضعيف - غير مجدي';
+                statusElement.style.color = '#e74c3c';
+            }
+            
+            // Update revenue breakdown if available
+            const results = window.calculationResults || {};
+            if (results.revenueBreakdown) {
+                document.getElementById('udheyaRevenueDisplay').textContent = formatNumber(results.revenueBreakdown.udheya || 0);
+                document.getElementById('meatRevenueDisplay').textContent = formatNumber(results.revenueBreakdown.meat || 0);
+                document.getElementById('liveRevenueDisplay').textContent = formatNumber(results.revenueBreakdown.live || 0);
+                document.getElementById('cateringRevenueDisplay').textContent = formatNumber(results.revenueBreakdown.catering || 0);
+                document.getElementById('eventRentalRevenueDisplay').textContent = formatNumber(results.revenueBreakdown.eventRental || 0);
+                document.getElementById('exportRevenueDisplay').textContent = formatNumber(results.revenueBreakdown.export || 0);
+                document.getElementById('othersRevenueDisplay').textContent = formatNumber(results.revenueBreakdown.others || 0);
+            }
         }
         
         function updateMarketStats() {
@@ -2612,7 +3351,216 @@
             }
         }
         
+        // Main chart initialization function
+        function createCharts() {
+            createCashFlowChart();
+            createRevenueChart();
+            createBreakEvenChart();
+            createCostBreakdownChart();
+        }
+        
         // Chart creation functions
+        function createCashFlowChart() {
+            const ctx = document.getElementById('cashFlowChart');
+            if (!ctx) return;
+            
+            if (charts.cashFlow) {
+                charts.cashFlow.destroy();
+            }
+            
+            const results = window.calculationResults || {};
+            const monthlyRevenue = (results.totalAnnualRevenue || 0) / 12;
+            const monthlyCosts = (results.totalAnnualCosts || 0) / 12;
+            const totalInvestment = results.totalInvestment || 0;
+            
+            let cumulativeCash = -totalInvestment;
+            const cashFlowData = [];
+            const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+            
+            // Calculate monthly cash flow with seasonal variations
+            for (let i = 0; i < 12; i++) {
+                let monthlyNet = monthlyRevenue - monthlyCosts;
+                
+                // Add seasonal variations (higher revenue during Eid months)
+                if (i === 6 || i === 7) { // July/August (Eid al-Adha typical months)
+                    monthlyNet *= 1.8; // 80% increase
+                }
+                
+                cumulativeCash += monthlyNet;
+                cashFlowData.push(cumulativeCash);
+            }
+            
+            charts.cashFlow = new Chart(ctx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'التدفق النقدي المتراكم',
+                        data: cashFlowData,
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'تحليل التدفق النقدي الشهري'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                callback: function(value) {
+                                    return new Intl.NumberFormat('ar-EG').format(value) + ' جنيه';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createRevenueChart() {
+            const ctx = document.getElementById('revenueChart');
+            if (!ctx) return;
+            
+            if (charts.revenue) {
+                charts.revenue.destroy();
+            }
+            
+            const results = window.calculationResults || {};
+            const inputs = results.inputs || {};
+            
+            // Calculate revenue components
+            const avgOffspring = (inputs.ewes || 0) * (inputs.fertilityRate || 85) / 100 * (inputs.birthsPerYear || 1.5) * (inputs.avgOffspring || 1.2);
+            const maleOffspring = avgOffspring * (inputs.maleRatio || 50) / 100;
+            
+            const udheyaRevenue = maleOffspring * 0.6 * (inputs.udheyaPrice || 8000);
+            const meatRevenue = (inputs.meatDemand || 10) * 12 * (inputs.meatPrice || 250) * (inputs.sellingWeight || 45) * 0.5;
+            const liveAnimalRevenue = (inputs.liveAnimalMonthly || 5) * 12 * (inputs.liveAnimalPrice || 6000);
+            const cateringRevenue = (inputs.cateringEvents || 4) * 12 * (inputs.cateringPeople || 50) * (inputs.cateringPrice || 150);
+            const eventRentalRevenue = (inputs.eventRentals || 3) * 12 * (inputs.eventRentalPrice || 500);
+            const exportRevenue = (inputs.exportMonthly || 5) * 12 * (inputs.exportPrice || 12000);
+            const manureRevenue = ((inputs.ewes || 0) + (inputs.rams || 0)) * 0.5 * (inputs.manurePrice || 300);
+            const hideRevenue = ((inputs.meatDemand || 10) * 12 * 0.8) * (inputs.hidePrice || 150);
+            
+            charts.revenue = new Chart(ctx.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['أضاحي', 'لحوم', 'حيوانات حية', 'كاترينج', 'تأجير', 'تصدير', 'سماد', 'جلود'],
+                    datasets: [{
+                        data: [udheyaRevenue, meatRevenue, liveAnimalRevenue, cateringRevenue, eventRentalRevenue, exportRevenue, manureRevenue, hideRevenue],
+                        backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#ffecd2', '#a8edea', '#f5af19', '#4facfe', '#fa709a']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = new Intl.NumberFormat('ar-EG').format(context.parsed);
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                    return `${label}: ${value} جنيه (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createBreakEvenChart() {
+            const ctx = document.getElementById('breakEvenChart');
+            if (!ctx) return;
+            
+            if (charts.breakeven) {
+                charts.breakeven.destroy();
+            }
+            
+            const results = window.calculationResults || {};
+            const totalInvestment = results.totalInvestment || 0;
+            const monthlyProfit = (results.annualProfit || 0) / 12;
+            
+            const months = Array.from({length: 24}, (_, i) => i + 1);
+            const revenue = [];
+            const costs = [];
+            
+            for (let i = 1; i <= 24; i++) {
+                revenue.push(monthlyProfit * i);
+                costs.push(totalInvestment);
+            }
+            
+            charts.breakeven = new Chart(ctx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'العائد المتراكم',
+                        data: revenue,
+                        borderColor: '#27ae60',
+                        backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'الاستثمار المبدئي',
+                        data: costs,
+                        borderColor: '#e74c3c',
+                        borderDash: [5, 5],
+                        backgroundColor: 'transparent'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'تحليل نقطة التعادل'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'الشهور'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return new Intl.NumberFormat('ar-EG').format(value) + ' جنيه';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createCostBreakdownChart() {
+            // This function already exists as updateCostBreakdownChart
+            updateCostBreakdownChart();
+        }
+        
         function createSeasonalCharts() {
             // Destroy existing charts
             if (charts.seasonal) charts.seasonal.destroy();
@@ -3124,8 +4072,150 @@
         }
         
         function showDetailedReport() {
-            // Would show a detailed report in a modal
-            alert('تقرير مفصل سيكون متاحاً قريباً');
+            generateDetailedReport();
+        }
+        
+        function generateDetailedReport() {
+            const results = window.calculationResults || {};
+            const inputs = results.inputs || {};
+            
+            // Create detailed report HTML
+            const reportHTML = `
+                <div style="direction: rtl; padding: 20px; max-width: 800px; margin: 0 auto; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+                    <h2 style="text-align: center; color: #667eea; margin-bottom: 30px;">📊 تقرير مفصل - مشروع تربية الأغنام</h2>
+                    
+                    <div style="margin-bottom: 30px;">
+                        <h3 style="color: #2c3e50; border-bottom: 2px solid #667eea; padding-bottom: 10px;">📈 ملخص مالي</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                            <div style="padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                                <strong>إجمالي الاستثمار:</strong><br>
+                                <span style="font-size: 24px; color: #667eea;">${new Intl.NumberFormat('ar-EG').format(results.totalInvestment || 0)} جنيه</span>
+                            </div>
+                            <div style="padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                                <strong>الإيرادات السنوية:</strong><br>
+                                <span style="font-size: 24px; color: #27ae60;">${new Intl.NumberFormat('ar-EG').format(results.totalAnnualRevenue || 0)} جنيه</span>
+                            </div>
+                            <div style="padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                                <strong>صافي الربح السنوي:</strong><br>
+                                <span style="font-size: 24px; color: #3498db;">${new Intl.NumberFormat('ar-EG').format(results.annualProfit || 0)} جنيه</span>
+                            </div>
+                            <div style="padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                                <strong>العائد على الاستثمار:</strong><br>
+                                <span style="font-size: 24px; color: #9b59b6;">${(results.roi || 0).toFixed(1)}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 30px;">
+                        <h3 style="color: #2c3e50; border-bottom: 2px solid #667eea; padding-bottom: 10px;">🐑 تفاصيل القطيع</h3>
+                        <ul style="list-style: none; padding: 0;">
+                            <li style="padding: 8px 0;">• عدد النعاج: ${inputs.ewes || 0}</li>
+                            <li style="padding: 8px 0;">• عدد الكباش: ${inputs.rams || 0}</li>
+                            <li style="padding: 8px 0;">• إجمالي القطيع: ${(inputs.ewes || 0) + (inputs.rams || 0)}</li>
+                            <li style="padding: 8px 0;">• معدل الخصوبة: ${inputs.fertilityRate || 85}%</li>
+                            <li style="padding: 8px 0;">• عدد الولادات/السنة: ${inputs.birthsPerYear || 1.5}</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="margin-bottom: 30px;">
+                        <h3 style="color: #2c3e50; border-bottom: 2px solid #667eea; padding-bottom: 10px;">💰 توزيع الإيرادات</h3>
+                        <canvas id="reportRevenueChart" style="max-height: 300px;"></canvas>
+                    </div>
+                    
+                    <div style="margin-bottom: 30px;">
+                        <h3 style="color: #2c3e50; border-bottom: 2px solid #667eea; padding-bottom: 10px;">📊 نقطة التعادل</h3>
+                        <p style="text-align: center; font-size: 18px;">
+                            سيحقق المشروع نقطة التعادل خلال <strong style="color: #e74c3c; font-size: 24px;">${Math.ceil(results.breakEvenMonths || 0)}</strong> شهر
+                        </p>
+                    </div>
+                    
+                    <div style="margin-top: 30px; text-align: center;">
+                        <button onclick="printDetailedReport()" class="btn btn-primary" style="margin-left: 10px;">
+                            <span>🖨️</span> طباعة التقرير
+                        </button>
+                        <button onclick="closeDetailedReport()" class="btn btn-secondary">
+                            <span>✕</span> إغلاق
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Create modal overlay
+            const modal = document.createElement('div');
+            modal.id = 'reportModal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 2000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow-y: auto;
+                padding: 20px;
+            `;
+            modal.innerHTML = reportHTML;
+            document.body.appendChild(modal);
+            
+            // Create mini revenue chart
+            setTimeout(() => {
+                const ctx = document.getElementById('reportRevenueChart');
+                if (ctx) {
+                    createReportRevenueChart(ctx);
+                }
+            }, 100);
+        }
+        
+        function createReportRevenueChart(ctx) {
+            const results = window.calculationResults || {};
+            const inputs = results.inputs || {};
+            
+            // Calculate revenue components
+            const avgOffspring = (inputs.ewes || 0) * (inputs.fertilityRate || 85) / 100 * (inputs.birthsPerYear || 1.5) * (inputs.avgOffspring || 1.2);
+            const maleOffspring = avgOffspring * (inputs.maleRatio || 50) / 100;
+            
+            const udheyaRevenue = maleOffspring * 0.6 * (inputs.udheyaPrice || 8000);
+            const meatRevenue = (inputs.meatDemand || 10) * 12 * (inputs.meatPrice || 250) * (inputs.sellingWeight || 45) * 0.5;
+            const liveAnimalRevenue = (inputs.liveAnimalMonthly || 5) * 12 * (inputs.liveAnimalPrice || 6000);
+            const cateringRevenue = (inputs.cateringEvents || 4) * 12 * (inputs.cateringPeople || 50) * (inputs.cateringPrice || 150);
+            const eventRentalRevenue = (inputs.eventRentals || 3) * 12 * (inputs.eventRentalPrice || 500);
+            const exportRevenue = (inputs.exportMonthly || 5) * 12 * (inputs.exportPrice || 12000);
+            const manureRevenue = ((inputs.ewes || 0) + (inputs.rams || 0)) * 0.5 * (inputs.manurePrice || 300);
+            const hideRevenue = ((inputs.meatDemand || 10) * 12 * 0.8) * (inputs.hidePrice || 150);
+            
+            new Chart(ctx.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: ['أضاحي', 'لحوم', 'حيوانات حية', 'كاترينج', 'تأجير', 'تصدير', 'سماد', 'جلود'],
+                    datasets: [{
+                        data: [udheyaRevenue, meatRevenue, liveAnimalRevenue, cateringRevenue, eventRentalRevenue, exportRevenue, manureRevenue, hideRevenue],
+                        backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#ffecd2', '#a8edea', '#f5af19', '#4facfe', '#fa709a']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+        
+        function closeDetailedReport() {
+            const modal = document.getElementById('reportModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        function printDetailedReport() {
+            window.print();
         }
         
         function setReminder() {
@@ -3578,6 +4668,188 @@
             const eurRate = parseFloat(document.getElementById('eurRate').value) || 33.5;
             document.getElementById('reverseEGP').textContent = new Intl.NumberFormat('ar-EG').format(Math.round(eurAmount * eurRate));
         }
+        
+        // Operational Tools Functions
+        function simulateOutbreak() {
+            const diseaseType = document.getElementById('diseaseType').value;
+            const infectionRate = parseFloat(document.getElementById('infectionRate').value) || 30;
+            const diseaseMortality = parseFloat(document.getElementById('diseaseMortality').value) || 15;
+            const treatmentCost = parseFloat(document.getElementById('treatmentCost').value) || 500;
+            const weightLoss = parseFloat(document.getElementById('weightLoss').value) || 20;
+            const recoveryDays = parseFloat(document.getElementById('recoveryDays').value) || 21;
+            
+            const flockSize = parseFloat(document.getElementById('ewes').value) + parseFloat(document.getElementById('rams').value);
+            const animalValue = parseFloat(document.getElementById('ewePrice').value) || 3500;
+            
+            const infectedAnimals = Math.round(flockSize * infectionRate / 100);
+            const deaths = Math.round(infectedAnimals * diseaseMortality / 100);
+            const recoveredAnimals = infectedAnimals - deaths;
+            
+            const treatmentCosts = infectedAnimals * treatmentCost;
+            const mortalityLoss = deaths * animalValue;
+            const weightLossValue = recoveredAnimals * animalValue * (weightLoss / 100);
+            const totalLoss = treatmentCosts + mortalityLoss + weightLossValue;
+            
+            const resultsDiv = document.getElementById('outbreakResults');
+            resultsDiv.innerHTML = `
+                <div class="card" style="background: #fee8e8; border: 2px solid #e74c3c;">
+                    <h3 style="color: #e74c3c; margin-bottom: 12px;">نتائج المحاكاة - ${diseaseType.toUpperCase()}</h3>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card" style="background: #e74c3c;">
+                            <div class="stat-value">${infectedAnimals}</div>
+                            <div class="stat-label">رأس مصاب</div>
+                        </div>
+                        <div class="stat-card" style="background: #c0392b;">
+                            <div class="stat-value">${deaths}</div>
+                            <div class="stat-label">نفوق</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 16px;">
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                            <span>تكلفة العلاج:</span>
+                            <span style="font-weight: 600;">${new Intl.NumberFormat('ar-EG').format(treatmentCosts)} جنيه</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                            <span>خسائر النفوق:</span>
+                            <span style="font-weight: 600;">${new Intl.NumberFormat('ar-EG').format(mortalityLoss)} جنيه</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                            <span>خسائر فقدان الوزن:</span>
+                            <span style="font-weight: 600;">${new Intl.NumberFormat('ar-EG').format(weightLossValue)} جنيه</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 12px 0; border-top: 2px solid #e74c3c; margin-top: 8px;">
+                            <span style="font-weight: 700;">إجمالي الخسائر:</span>
+                            <span style="font-weight: 700; color: #e74c3c;">${new Intl.NumberFormat('ar-EG').format(totalLoss)} جنيه</span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 16px; padding: 12px; background: white; border-radius: 8px;">
+                        <h4 style="margin-bottom: 8px;">توصيات وقائية:</h4>
+                        <ul style="margin: 0; padding-right: 20px;">
+                            <li>تطبيق برنامج تحصين شامل</li>
+                            <li>عزل الحيوانات المصابة فوراً</li>
+                            <li>تحسين التهوية والنظافة</li>
+                            <li>مراقبة يومية للقطيع</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+            resultsDiv.style.display = 'block';
+            
+            // Create operational chart
+            createOperationalChart();
+        }
+        
+        function optimizeLaborSchedule() {
+            const currentWorkers = parseFloat(document.getElementById('currentWorkers').value) || 3;
+            const workHours = parseFloat(document.getElementById('workHours').value) || 8;
+            const workDays = parseFloat(document.getElementById('workDays').value) || 6;
+            const sheepPerWorker = parseFloat(document.getElementById('sheepPerWorker').value) || 50;
+            
+            const flockSize = parseFloat(document.getElementById('ewes').value) + parseFloat(document.getElementById('rams').value);
+            const requiredWorkers = Math.ceil(flockSize / sheepPerWorker);
+            const totalWorkHours = currentWorkers * workHours * workDays * 4; // Monthly
+            const requiredWorkHours = requiredWorkers * workHours * workDays * 4;
+            
+            const efficiency = Math.min((currentWorkers / requiredWorkers) * 100, 100);
+            const workerShortage = Math.max(0, requiredWorkers - currentWorkers);
+            
+            const resultsDiv = document.getElementById('laborResults');
+            resultsDiv.innerHTML = `
+                <div class="card" style="background: #e8f4f8;">
+                    <h3 style="color: #3498db; margin-bottom: 12px;">تحليل العمالة</h3>
+                    
+                    <div class="progress-bar" style="margin-bottom: 16px;">
+                        <div class="progress-fill" style="width: ${efficiency}%;"></div>
+                    </div>
+                    <p style="text-align: center; margin-bottom: 16px;">كفاءة العمالة: ${efficiency.toFixed(1)}%</p>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 24px; font-weight: 700; color: #3498db;">${currentWorkers}</div>
+                            <div style="font-size: 12px; color: #6c757d;">عمال حاليون</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 24px; font-weight: 700; color: ${workerShortage > 0 ? '#e74c3c' : '#27ae60'};">${requiredWorkers}</div>
+                            <div style="font-size: 12px; color: #6c757d;">عمال مطلوبون</div>
+                        </div>
+                    </div>
+                    
+                    ${workerShortage > 0 ? `
+                        <div style="margin-top: 16px; padding: 12px; background: #fee8e8; border-radius: 8px;">
+                            <p style="color: #e74c3c; margin: 0;">⚠️ نقص في العمالة: ${workerShortage} عامل</p>
+                        </div>
+                    ` : `
+                        <div style="margin-top: 16px; padding: 12px; background: #d4edda; border-radius: 8px;">
+                            <p style="color: #27ae60; margin: 0;">✅ العمالة كافية للقطيع الحالي</p>
+                        </div>
+                    `}
+                    
+                    <div style="margin-top: 16px;">
+                        <h4>جدول العمل المقترح:</h4>
+                        <ul style="margin: 8px 0; padding-right: 20px;">
+                            <li>وردية صباحية: ${Math.ceil(requiredWorkers * 0.6)} عامل</li>
+                            <li>وردية مسائية: ${Math.floor(requiredWorkers * 0.4)} عامل</li>
+                            <li>إجازة أسبوعية بالتناوب</li>
+                            <li>عامل احتياطي للطوارئ</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function createOperationalChart() {
+            const ctx = document.getElementById('operationalChart');
+            if (!ctx) return;
+            
+            if (charts.operational) charts.operational.destroy();
+            
+            const flockSize = parseFloat(document.getElementById('ewes').value) + parseFloat(document.getElementById('rams').value);
+            const workers = parseFloat(document.getElementById('currentWorkers').value) || 3;
+            const feedPerHead = parseFloat(document.getElementById('feedPerHead').value) || 2;
+            
+            charts.operational = new Chart(ctx.getContext('2d'), {
+                type: 'radar',
+                data: {
+                    labels: ['العمالة', 'التغذية', 'الصحة', 'الإنتاجية', 'الكفاءة'],
+                    datasets: [{
+                        label: 'الأداء الحالي',
+                        data: [
+                            Math.min((workers * 50 / flockSize) * 100, 100),
+                            85,
+                            75,
+                            80,
+                            70
+                        ],
+                        backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                        borderColor: '#667eea',
+                        pointBackgroundColor: '#667eea'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Update showSection to handle operational tools
+        const originalShowSection = showSection;
+        showSection = function(sectionId, direction = null) {
+            originalShowSection(sectionId, direction);
+            
+            if (sectionId === 'operationalTools') {
+                createOperationalChart();
+            }
+        };
     </script>
 </body>
 </html>
