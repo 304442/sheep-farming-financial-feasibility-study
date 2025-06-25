@@ -5,6 +5,108 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>حاسبة جدوى مشروع تربية الأغنام - مصر</title>
     <style>
+        /* Chart.js styling */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 15px 0;
+        }
+        
+        .chart-section {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+        
+        .chart-section h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        /* Data management controls */
+        .data-controls {
+            background: #34495e;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .data-controls button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            background: #3498db;
+            color: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background 0.3s;
+        }
+        
+        .data-controls button:hover {
+            background: #2980b9;
+        }
+        
+        .data-controls input[type="file"] {
+            display: none;
+        }
+        
+        /* Export modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 500px;
+            direction: rtl;
+        }
+        
+        .close {
+            color: #aaa;
+            float: left;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: black;
+        }
+        
+        /* Print styles */
+        @media print {
+            .tabs, .data-controls {
+                display: none;
+            }
+            
+            .tab-content {
+                display: block !important;
+                page-break-inside: avoid;
+            }
+            
+            .chart-container {
+                height: 200px;
+            }
+        }
         * {
             box-sizing: border-box;
             margin: 0;
@@ -376,10 +478,25 @@
             }
         }
     </style>
+    <!-- Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jsPDF library for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>🐑 حاسبة جدوى مشروع تربية الأغنام - مصر</h1>
+        
+        <!-- Data Management Controls -->
+        <div class="data-controls">
+            <button onclick="saveProject()">💾 حفظ المشروع</button>
+            <button onclick="document.getElementById('loadFile').click()">📂 تحميل مشروع</button>
+            <input type="file" id="loadFile" accept=".json" onchange="loadProject(event)">
+            <button onclick="exportToPDF()">📄 تصدير PDF</button>
+            <button onclick="exportToExcel()">📊 تصدير Excel</button>
+            <button onclick="window.print()">🖨️ طباعة</button>
+            <button onclick="showModal('reportModal')">📈 تقرير مفصل</button>
+        </div>
         
         <!-- Quick Summary Dashboard -->
         <div id="quickSummary" style="background: #2c3e50; color: white; padding: 8px; border-radius: 6px; margin-bottom: 10px; display: none;">
@@ -420,6 +537,13 @@
             <button class="tab" onclick="showTab('risks')">المخاطر والضرائب</button>
             <button class="tab" onclick="showTab('seasonal')">التحليل الموسمي</button>
             <button class="tab" onclick="showTab('financial')">التحليل المالي</button>
+            <button class="tab" onclick="showTab('multiyear')">التخطيط متعدد السنوات</button>
+            <button class="tab" onclick="showTab('feedOptimizer')">محسن الأعلاف</button>
+            <button class="tab" onclick="showTab('breedingCalendar')">تقويم التربية</button>
+            <button class="tab" onclick="showTab('sensitivity')">تحليل الحساسية</button>
+            <button class="tab" onclick="showTab('marketIntel')">ذكاء السوق</button>
+            <button class="tab" onclick="showTab('compliance')">الالتزامات</button>
+            <button class="tab" onclick="showTab('operations')">أدوات تشغيلية</button>
         </div>
         
         <!-- بحث السوق -->
@@ -1141,6 +1265,24 @@
         
         <!-- التحليل المالي -->
         <div id="financial" class="tab-content">
+            <!-- Visual Analytics Charts -->
+            <div class="chart-section">
+                <h3>📊 الرسوم البيانية التحليلية</h3>
+                <div class="grid-2">
+                    <div class="chart-container">
+                        <canvas id="cashFlowChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="breakEvenChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="costBreakdownChart"></canvas>
+                    </div>
+                </div>
+            </div>
             <div class="summary-section">
                 <h2>📊 الملخص المالي الشامل</h2>
                 
@@ -1229,6 +1371,563 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Multi-Year Planning -->
+        <div id="multiyear" class="tab-content">
+            <div class="info-box">
+                📈 التخطيط الاستراتيجي للمشروع على مدار 5 سنوات مع نمو القطيع والاستثمارات
+            </div>
+            
+            <div class="grid">
+                <div class="section">
+                    <h3>معدلات النمو المتوقعة</h3>
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>نمو القطيع السنوي %</label>
+                            <input type="number" id="flockGrowthRate" value="25">
+                            <span class="small-text">من خلال المواليد والشراء</span>
+                        </div>
+                        <div class="input-group">
+                            <label>تحسن الإنتاجية %</label>
+                            <input type="number" id="productivityImprovement" value="5">
+                            <span class="small-text">سنوياً</span>
+                        </div>
+                        <div class="input-group">
+                            <label>زيادة الأسعار %</label>
+                            <input type="number" id="priceInflation" value="8">
+                        </div>
+                        <div class="input-group">
+                            <label>زيادة التكاليف %</label>
+                            <input type="number" id="costInflation" value="6">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>خطة التوسعات</h3>
+                    <div class="grid-3">
+                        <div class="input-group">
+                            <label>توسعة السنة 2</label>
+                            <input type="number" id="expansion2" value="100000">
+                            <span class="small-text">حظائر إضافية</span>
+                        </div>
+                        <div class="input-group">
+                            <label>توسعة السنة 3</label>
+                            <input type="number" id="expansion3" value="150000">
+                            <span class="small-text">معدات تصنيع</span>
+                        </div>
+                        <div class="input-group">
+                            <label>توسعة السنة 5</label>
+                            <input type="number" id="expansion5" value="200000">
+                            <span class="small-text">فرع جديد</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 5-Year Projections Table -->
+            <div class="chart-section">
+                <h3>📊 الإسقاطات المالية لـ 5 سنوات</h3>
+                <table id="fiveYearTable" style="width: 100%; border-collapse: collapse; margin: 10px 0;">
+                    <thead style="background: #3498db; color: white;">
+                        <tr>
+                            <th style="padding: 8px; border: 1px solid #ddd;">البيان</th>
+                            <th style="padding: 8px; border: 1px solid #ddd;">السنة 1</th>
+                            <th style="padding: 8px; border: 1px solid #ddd;">السنة 2</th>
+                            <th style="padding: 8px; border: 1px solid #ddd;">السنة 3</th>
+                            <th style="padding: 8px; border: 1px solid #ddd;">السنة 4</th>
+                            <th style="padding: 8px; border: 1px solid #ddd;">السنة 5</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fiveYearTableBody">
+                        <!-- Will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Multi-Year Charts -->
+            <div class="chart-section">
+                <h3>📈 الرسوم البيانية متعددة السنوات</h3>
+                <div class="grid-2">
+                    <div class="chart-container">
+                        <canvas id="multiYearRevenueChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="flockGrowthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Feed Optimizer -->
+        <div id="feedOptimizer" class="tab-content">
+            <div class="info-box">
+                🌾 محسن الأعلاف - احسب التركيبة المثلى للعلف لتحقيق أفضل نسبة تكلفة/تغذية
+            </div>
+            
+            <div class="grid">
+                <div class="section">
+                    <h3>مكونات العلف المتاحة</h3>
+                    <div class="grid-3">
+                        <div class="input-group">
+                            <label>ذرة - سعر/طن</label>
+                            <input type="number" id="cornPrice" value="8000">
+                            <span class="small-text">طاقة: 3.2 ميجا كالوري</span>
+                        </div>
+                        <div class="input-group">
+                            <label>كسب فول صويا - سعر/طن</label>
+                            <input type="number" id="soybeanPrice" value="15000">
+                            <span class="small-text">بروتين: 44%</span>
+                        </div>
+                        <div class="input-group">
+                            <label>نخالة قمح - سعر/طن</label>
+                            <input type="number" id="wheatBranPrice" value="6000">
+                            <span class="small-text">ألياف: 12%</span>
+                        </div>
+                        <div class="input-group">
+                            <label>شعير - سعر/طن</label>
+                            <input type="number" id="barleyPrice" value="7000">
+                            <span class="small-text">طاقة: 2.8 ميجا كالوري</span>
+                        </div>
+                        <div class="input-group">
+                            <label>علف مركز - سعر/طن</label>
+                            <input type="number" id="concentratePrice" value="12000">
+                            <span class="small-text">متوازن</span>
+                        </div>
+                        <div class="input-group">
+                            <label>دريس برسيم - سعر/طن</label>
+                            <input type="number" id="alfalfaPrice" value="4000">
+                            <span class="small-text">ألياف عالية</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>المتطلبات الغذائية</h3>
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>البروتين المطلوب %</label>
+                            <input type="number" id="requiredProtein" value="16" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>الطاقة المطلوبة (ميجا كالوري/كجم)</label>
+                            <input type="number" id="requiredEnergy" value="2.8" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>الألياف القصوى %</label>
+                            <input type="number" id="maxFiber" value="18">
+                        </div>
+                        <div class="input-group">
+                            <label>كمية العلف اليومية (كجم)</label>
+                            <input type="number" id="dailyFeedAmount" value="1.5" step="0.1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Optimized Feed Formula -->
+            <div class="chart-section">
+                <h3>🎯 التركيبة المثلى للعلف</h3>
+                <div class="grid-2">
+                    <div>
+                        <h4>النسب المثلى:</h4>
+                        <div id="optimalFormula" style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                        <div class="result">
+                            تكلفة الطن: <span id="optimalCost">0</span> جنيه
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="feedCompositionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Breeding Calendar -->
+        <div id="breedingCalendar" class="tab-content">
+            <div class="info-box">
+                📅 تقويم التربية وتتبع مواعيد التلقيح والولادة والفطام
+            </div>
+            
+            <div class="grid">
+                <div class="section">
+                    <h3>برنامج التلقيح السنوي</h3>
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>بداية موسم التلقيح الأول</label>
+                            <input type="date" id="breeding1Start" value="2024-09-01">
+                        </div>
+                        <div class="input-group">
+                            <label>بداية موسم التلقيح الثاني</label>
+                            <input type="date" id="breeding2Start" value="2025-03-01">
+                        </div>
+                        <div class="input-group">
+                            <label>مدة التلقيح (يوم)</label>
+                            <input type="number" id="breedingDuration" value="45">
+                        </div>
+                        <div class="input-group">
+                            <label>فترة الحمل (يوم)</label>
+                            <input type="number" id="gestationDays" value="150" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Breeding Calendar Display -->
+            <div class="chart-section">
+                <h3>📅 تقويم الأحداث المهمة</h3>
+                <div id="breedingSchedule" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+            
+            <!-- Production Timeline Chart -->
+            <div class="chart-section">
+                <h3>📈 خط زمني للإنتاج</h3>
+                <div class="chart-container">
+                    <canvas id="productionTimelineChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sensitivity Analysis -->
+        <div id="sensitivity" class="tab-content">
+            <div class="info-box">
+                🔍 تحليل الحساسية - اعرف كيف تؤثر التغييرات في المتغيرات الرئيسية على ربحية المشروع
+            </div>
+            
+            <div class="grid">
+                <div class="section">
+                    <h3>نطاق التحليل</h3>
+                    <div class="grid-3">
+                        <div class="input-group">
+                            <label>تغيير أسعار البيع (%)</label>
+                            <input type="number" id="priceVariation" value="20" step="5">
+                        </div>
+                        <div class="input-group">
+                            <label>تغيير تكاليف العلف (%)</label>
+                            <input type="number" id="feedCostVariation" value="25" step="5">
+                        </div>
+                        <div class="input-group">
+                            <label>تغيير معدل الولادة (%)</label>
+                            <input type="number" id="birthRateVariation" value="15" step="5">
+                        </div>
+                        <div class="input-group">
+                            <label>تغيير معدل النفوق (%)</label>
+                            <input type="number" id="mortalityVariation" value="10" step="2">
+                        </div>
+                        <div class="input-group">
+                            <label>تغيير الطلب على المنتج (%)</label>
+                            <input type="number" id="demandVariation" value="30" step="5">
+                        </div>
+                        <div class="input-group">
+                            <label>عدد محاكاة مونت كارلو</label>
+                            <input type="number" id="monteCarloRuns" value="1000" step="100">
+                        </div>
+                    </div>
+                    <button onclick="runSensitivityAnalysis()" style="padding: 8px 20px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px;">
+                        تشغيل التحليل
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Sensitivity Results -->
+            <div class="chart-section">
+                <h3>📈 نتائج تحليل الحساسية</h3>
+                <div class="grid-2">
+                    <div class="chart-container">
+                        <canvas id="sensitivityChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="monteCarloChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Risk Assessment -->
+            <div class="chart-section">
+                <h3>⚠️ تقييم المخاطر</h3>
+                <div id="riskAssessment" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Market Intelligence -->
+        <div id="marketIntel" class="tab-content">
+            <div class="info-box">
+                📈 ذكاء السوق - تحليل اتجاهات الأسعار والمنافسين وتوقع الطلب
+            </div>
+            
+            <div class="grid">
+                <div class="section">
+                    <h3>بيانات الأسعار التاريخية</h3>
+                    <div class="grid-3">
+                        <div class="input-group">
+                            <label>متوسط سعر الأضحية 2023</label>
+                            <input type="number" id="price2023" value="7500">
+                        </div>
+                        <div class="input-group">
+                            <label>متوسط سعر الأضحية 2022</label>
+                            <input type="number" id="price2022" value="7000">
+                        </div>
+                        <div class="input-group">
+                            <label>متوسط سعر الأضحية 2021</label>
+                            <input type="number" id="price2021" value="6500">
+                        </div>
+                        <div class="input-group">
+                            <label>زيادة رمضان %</label>
+                            <input type="number" id="ramadanPriceIncrease" value="15">
+                        </div>
+                        <div class="input-group">
+                            <label>زيادة الحج %</label>
+                            <input type="number" id="hajjPriceIncrease" value="25">
+                        </div>
+                        <div class="input-group">
+                            <label>انخفاض الصيف %</label>
+                            <input type="number" id="summerPriceDecrease" value="10">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>تحليل المنافسين</h3>
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>عدد المزارع في المنطقة</label>
+                            <input type="number" id="competitorCount" value="8">
+                        </div>
+                        <div class="input-group">
+                            <label>متوسط حجم قطيع المنافس</label>
+                            <input type="number" id="competitorFlockSize" value="40">
+                        </div>
+                        <div class="input-group">
+                            <label>حصتنا المتوقعة من السوق %</label>
+                            <input type="number" id="marketShare" value="12">
+                        </div>
+                        <div class="input-group">
+                            <label>ميزتنا التنافسية</label>
+                            <select id="competitiveAdvantage">
+                                <option value="price">السعر</option>
+                                <option value="quality">الجودة</option>
+                                <option value="service">الخدمة</option>
+                                <option value="location">الموقع</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>توقع الطلب</h3>
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>عدد العائلات في المنطقة</label>
+                            <input type="number" id="totalFamilies" value="5000">
+                        </div>
+                        <div class="input-group">
+                            <label>نسبة من يضحي %</label>
+                            <input type="number" id="sacrificePercentage" value="70">
+                        </div>
+                        <div class="input-group">
+                            <label>نمو عدد السكان سنوياً %</label>
+                            <input type="number" id="populationGrowth" value="2.5">
+                        </div>
+                        <div class="input-group">
+                            <label>زيادة القوة الشرائية %</label>
+                            <input type="number" id="purchasingPowerGrowth" value="5">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Price Trends Chart -->
+            <div class="chart-section">
+                <h3>📈 اتجاهات الأسعار وتوقعات الطلب</h3>
+                <div class="grid-2">
+                    <div class="chart-container">
+                        <canvas id="priceTrendsChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="demandForecastChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Compliance & Certification -->
+        <div id="compliance" class="tab-content">
+            <div class="info-box">
+                📋 متتبع الالتزامات - تأكد من استيفاء جميع المتطلبات القانونية والشهادات
+            </div>
+            
+            <div class="grid">
+                <div class="section">
+                    <h3>الوثائق الأساسية</h3>
+                    <div id="basicDocuments" class="compact-grid">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>شهادات الجودة والصحة</h3>
+                    <div id="qualityDocuments" class="compact-grid">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>متطلبات التصدير</h3>
+                    <div id="exportDocuments" class="compact-grid">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Compliance Progress -->
+            <div class="chart-section">
+                <h3>📈 حالة الالتزام</h3>
+                <div class="grid-2">
+                    <div class="chart-container">
+                        <canvas id="complianceChart"></canvas>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                        <h4>ملخص الالتزام:</h4>
+                        <div id="complianceSummary">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Operational Tools -->
+        <div id="operations" class="tab-content">
+            <div class="info-box">
+                🛠️ أدوات تشغيلية - محاكي الأمراض، جدولة العمالة، محول العملات
+            </div>
+            
+            <div class="grid">
+                <div class="section">
+                    <h3>محاكي تفشي الأمراض</h3>
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>نوع المرض</label>
+                            <select id="diseaseType">
+                                <option value="ppr">طاعون المجترات الصغيرة</option>
+                                <option value="fmd">الحمى القلاعية</option>
+                                <option value="parasites">الطفيليات</option>
+                                <option value="respiratory">أمراض تنفسية</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>نسبة الإصابة المتوقعة %</label>
+                            <input type="number" id="infectionRate" value="30">
+                        </div>
+                        <div class="input-group">
+                            <label>نسبة النفوق %</label>
+                            <input type="number" id="diseaseMortality" value="15">
+                        </div>
+                        <div class="input-group">
+                            <label>فترة العلاج (يوم)</label>
+                            <input type="number" id="treatmentDuration" value="14">
+                        </div>
+                        <div class="input-group">
+                            <label>تكلفة العلاج/رأس</label>
+                            <input type="number" id="treatmentCost" value="500">
+                        </div>
+                        <div class="input-group">
+                            <label>فقدان الوزن %</label>
+                            <input type="number" id="weightLoss" value="20">
+                        </div>
+                    </div>
+                    <button onclick="simulateOutbreak()" style="padding: 8px 20px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px;">
+                        محاكاة التفشي
+                    </button>
+                </div>
+                
+                <div class="section">
+                    <h3>جدولة العمالة</h3>
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>عدد ساعات العمل اليومية</label>
+                            <input type="number" id="dailyWorkHours" value="8">
+                        </div>
+                        <div class="input-group">
+                            <label>عدد أيام العمل الأسبوعية</label>
+                            <input type="number" id="workDaysPerWeek" value="6">
+                        </div>
+                        <div class="input-group">
+                            <label>معدل العمل الإضافي %</label>
+                            <input type="number" id="overtimeRate" value="50">
+                        </div>
+                        <div class="input-group">
+                            <label>عدد أيام الإجازة السنوية</label>
+                            <input type="number" id="annualLeaveDays" value="21">
+                        </div>
+                    </div>
+                    <button onclick="optimizeSchedule()" style="padding: 8px 20px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px;">
+                        تحسين الجدولة
+                    </button>
+                </div>
+                
+                <div class="section">
+                    <h3>محول العملات</h3>
+                    <div class="grid-3">
+                        <div class="input-group">
+                            <label>سعر الدولار الأمريكي</label>
+                            <input type="number" id="usdRate" value="31" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>سعر اليورو</label>
+                            <input type="number" id="eurRate" value="33" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>سعر الريال السعودي</label>
+                            <input type="number" id="sarRate" value="8.25" step="0.01">
+                        </div>
+                        <div class="input-group">
+                            <label>المبلغ بالجنيه</label>
+                            <input type="number" id="egpAmount" value="1000">
+                        </div>
+                        <div class="input-group">
+                            <label>بالدولار</label>
+                            <input type="number" id="usdAmount" readonly>
+                        </div>
+                        <div class="input-group">
+                            <label>باليورو</label>
+                            <input type="number" id="eurAmount" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Disease Impact Results -->
+            <div class="chart-section">
+                <h3>📈 نتائج المحاكاة والتحسين</h3>
+                <div class="grid-2">
+                    <div id="outbreakResults" style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                        <h4>تأثير تفشي المرض:</h4>
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                    <div id="scheduleResults" style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                        <h4>تحسين جدولة العمل:</h4>
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Export Modal -->
+    <div id="reportModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="hideModal('reportModal')">&times;</span>
+            <h3>📈 تقرير الجدوى المفصل</h3>
+            <div id="detailedReport"></div>
+            <button onclick="printReport()">طباعة التقرير</button>
+        </div>
     </div>
     
     <script>
@@ -1251,6 +1950,48 @@
             // Recalculate when showing financial, seasonal, breeding or risks tab
             if (tabName === 'financial' || tabName === 'seasonal' || tabName === 'breeding' || tabName === 'risks') {
                 calculateAll();
+                if (tabName === 'financial') {
+                    setTimeout(createCharts, 100); // Delay to ensure DOM is ready
+                }
+            }
+            
+            // Handle multi-year planning tab
+            if (tabName === 'multiyear') {
+                calculateAll();
+                setTimeout(calculateMultiYear, 100);
+            }
+            
+            // Handle feed optimizer tab
+            if (tabName === 'feedOptimizer') {
+                setTimeout(optimizeFeed, 100);
+            }
+            
+            // Handle breeding calendar tab
+            if (tabName === 'breedingCalendar') {
+                setTimeout(generateBreedingCalendar, 100);
+            }
+            
+            // Handle sensitivity analysis tab
+            if (tabName === 'sensitivity') {
+                // Sensitivity analysis runs on demand
+            }
+            
+            // Handle market intelligence tab
+            if (tabName === 'marketIntel') {
+                setTimeout(() => {
+                    createPriceTrendsChart();
+                    createDemandForecastChart();
+                }, 100);
+            }
+            
+            // Handle compliance tab
+            if (tabName === 'compliance') {
+                setTimeout(initializeCompliance, 100);
+            }
+            
+            // Handle operations tab
+            if (tabName === 'operations') {
+                setTimeout(updateCurrencyConverter, 100);
             }
         }
         
@@ -1557,6 +2298,1598 @@
                 document.getElementById('quickMargin').textContent = profitMargin + '%';
             }
         }
+        
+        // Charts storage
+        let charts = {};
+        
+        // Data Management Functions
+        function saveProject() {
+            const projectData = {
+                timestamp: new Date().toISOString(),
+                projectName: prompt('اسم المشروع:', 'مشروع تربية الأغنام') || 'مشروع تربية الأغنام',
+                data: {}
+            };
+            
+            // Collect all input values
+            const inputs = document.querySelectorAll('input[type="number"], select');
+            inputs.forEach(input => {
+                projectData.data[input.id] = input.value;
+            });
+            
+            const blob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${projectData.projectName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            alert('تم حفظ المشروع بنجاح!');
+        }
+        
+        function loadProject(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const projectData = JSON.parse(e.target.result);
+                    
+                    // Load all values
+                    Object.entries(projectData.data).forEach(([id, value]) => {
+                        const element = document.getElementById(id);
+                        if (element) {
+                            element.value = value;
+                        }
+                    });
+                    
+                    calculateAll();
+                    alert(`تم تحميل المشروع: ${projectData.projectName}`);
+                } catch (error) {
+                    alert('خطأ في تحميل الملف');
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        function exportToPDF() {
+            if (typeof jsPDF === 'undefined') {
+                alert('مكتبة PDF غير متوفرة');
+                return;
+            }
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Add Arabic font support (basic)
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(16);
+            doc.text('Sheep Farming Feasibility Report', 20, 20);
+            
+            // Add key metrics
+            doc.setFontSize(12);
+            let y = 40;
+            const metrics = [
+                ['Total Investment', document.getElementById('totalInvestment').textContent],
+                ['Year 1 Revenue', document.getElementById('yearOneRevenue').textContent],
+                ['Year 1 Profit', document.getElementById('yearOneProfit').textContent],
+                ['Break Even', document.getElementById('breakEven').textContent + ' months'],
+                ['ROI', document.getElementById('roi').textContent + '%']
+            ];
+            
+            metrics.forEach(([label, value]) => {
+                doc.text(`${label}: ${value}`, 20, y);
+                y += 10;
+            });
+            
+            doc.save('sheep_farming_report.pdf');
+        }
+        
+        function exportToExcel() {
+            // Simple CSV export (Excel compatible)
+            const data = [
+                ['البيان', 'القيمة'],
+                ['إجمالي الاستثمار', document.getElementById('totalInvestment').textContent],
+                ['إيرادات السنة 1', document.getElementById('yearOneRevenue').textContent],
+                ['صافي الربح', document.getElementById('yearOneProfit').textContent],
+                ['نقطة التعادل', document.getElementById('breakEven').textContent],
+                ['العائد', document.getElementById('roi').textContent + '%']
+            ];
+            
+            const csvContent = data.map(row => row.join(',')).join('\n');
+            const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'sheep_farming_analysis.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+            if (modalId === 'reportModal') {
+                generateDetailedReport();
+            }
+        }
+        
+        function hideModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        function generateDetailedReport() {
+            const report = `
+                <div style="text-align: right; direction: rtl; line-height: 1.6;">
+                    <h4>📊 ملخص المشروع</h4>
+                    <p><strong>إجمالي الاستثمار:</strong> ${document.getElementById('totalInvestment').textContent} جنيه</p>
+                    <p><strong>إيرادات السنة الأولى:</strong> ${document.getElementById('yearOneRevenue').textContent} جنيه</p>
+                    <p><strong>صافي الربح:</strong> ${document.getElementById('yearOneProfit').textContent} جنيه</p>
+                    <p><strong>نقطة التعادل:</strong> ${document.getElementById('breakEven').textContent} شهر</p>
+                    <p><strong>العائد على الاستثمار:</strong> ${document.getElementById('roi').textContent}%</p>
+                    
+                    <h4>📈 توزيع الإيرادات</h4>
+                    <p><strong>أضاحي:</strong> ${document.getElementById('udheyaRevenue').textContent} جنيه</p>
+                    <p><strong>لحوم:</strong> ${document.getElementById('meatRevenue').textContent} جنيه</p>
+                    <p><strong>حيوانات حية:</strong> ${document.getElementById('liveAnimalRevenue').textContent} جنيه</p>
+                    <p><strong>كاترينج:</strong> ${document.getElementById('cateringRevenue').textContent} جنيه</p>
+                    
+                    <h4>💰 هيكل التكاليف</h4>
+                    <p><strong>البنية التحتية:</strong> ${document.getElementById('infraTotal').textContent} جنيه</p>
+                    <p><strong>القطيع:</strong> ${document.getElementById('flockTotal').textContent} جنيه</p>
+                    <p><strong>رأس المال العامل:</strong> ${document.getElementById('workingCapital').textContent} جنيه</p>
+                </div>
+            `;
+            document.getElementById('detailedReport').innerHTML = report;
+        }
+        
+        function printReport() {
+            const reportContent = document.getElementById('detailedReport').innerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>تقرير جدوى مشروع تربية الأغنام</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        h4 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 5px; }
+                    </style>
+                </head>
+                <body>
+                    <h2>🐑 تقرير جدوى مشروع تربية الأغنام</h2>
+                    ${reportContent}
+                    <hr>
+                    <p style="font-size: 0.8em; color: #666; text-align: center;">
+                        تم إنشاء هذا التقرير في ${new Date().toLocaleDateString('ar-EG')}
+                    </p>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+        
+        // Chart Creation Functions
+        function createCharts() {
+            createCashFlowChart();
+            createRevenueChart();
+            createBreakEvenChart();
+            createCostBreakdownChart();
+        }
+        
+        function createCashFlowChart() {
+            const ctx = document.getElementById('cashFlowChart');
+            if (!ctx) return;
+            
+            if (charts.cashFlow) {
+                charts.cashFlow.destroy();
+            }
+            
+            const monthlyRevenue = parseFloat(document.getElementById('yearOneRevenue').textContent.replace(/,/g, '')) / 12;
+            const monthlyOperating = parseFloat(document.getElementById('monthlyOperating').textContent.replace(/,/g, ''));
+            const totalInvestment = parseFloat(document.getElementById('totalInvestment').textContent.replace(/,/g, ''));
+            
+            let cumulativeCash = -totalInvestment;
+            const cashFlowData = [];
+            
+            for (let i = 1; i <= 12; i++) {
+                const monthlyProfit = monthlyRevenue - monthlyOperating;
+                cumulativeCash += monthlyProfit;
+                cashFlowData.push(cumulativeCash);
+            }
+            
+            charts.cashFlow = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'],
+                    datasets: [{
+                        label: 'التدفق النقدي المتراكم',
+                        data: cashFlowData,
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'تحليل التدفق النقدي (12 شهر)'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString() + ' جنيه';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createRevenueChart() {
+            const ctx = document.getElementById('revenueChart');
+            if (!ctx) return;
+            
+            if (charts.revenue) {
+                charts.revenue.destroy();
+            }
+            
+            const revenueData = [
+                parseFloat(document.getElementById('udheyaRevenue').textContent.replace(/,/g, '')),
+                parseFloat(document.getElementById('meatRevenue').textContent.replace(/,/g, '')),
+                parseFloat(document.getElementById('liveAnimalRevenue').textContent.replace(/,/g, '')),
+                parseFloat(document.getElementById('cateringRevenue').textContent.replace(/,/g, '')),
+                parseFloat(document.getElementById('exportRevenue').textContent.replace(/,/g, '')),
+                parseFloat(document.getElementById('manureRevenue').textContent.replace(/,/g, ''))
+            ];
+            
+            charts.revenue = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['أضاحي', 'لحوم', 'حيوانات حية', 'كاترينج', 'تصدير', 'سماد'],
+                    datasets: [{
+                        data: revenueData,
+                        backgroundColor: [
+                            '#e74c3c',
+                            '#3498db',
+                            '#2ecc71',
+                            '#f39c12',
+                            '#9b59b6',
+                            '#1abc9c'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'توزيع مصادر الإيراد'
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createBreakEvenChart() {
+            const ctx = document.getElementById('breakEvenChart');
+            if (!ctx) return;
+            
+            if (charts.breakEven) {
+                charts.breakEven.destroy();
+            }
+            
+            const monthlyRevenue = parseFloat(document.getElementById('yearOneRevenue').textContent.replace(/,/g, '')) / 12;
+            const monthlyOperating = parseFloat(document.getElementById('monthlyOperating').textContent.replace(/,/g, ''));
+            const totalInvestment = parseFloat(document.getElementById('totalInvestment').textContent.replace(/,/g, ''));
+            
+            const months = [];
+            const cumulativeRevenue = [];
+            const cumulativeCosts = [];
+            
+            let totalRev = 0;
+            let totalCost = totalInvestment;
+            
+            for (let i = 1; i <= 24; i++) {
+                months.push(i);
+                totalRev += monthlyRevenue;
+                totalCost += monthlyOperating;
+                cumulativeRevenue.push(totalRev);
+                cumulativeCosts.push(totalCost);
+            }
+            
+            charts.breakEven = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            label: 'إجمالي الإيرادات',
+                            data: cumulativeRevenue,
+                            borderColor: '#2ecc71',
+                            backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'إجمالي التكاليف',
+                            data: cumulativeCosts,
+                            borderColor: '#e74c3c',
+                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'تحليل نقطة التعادل (24 شهر)'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return (value / 1000000).toFixed(1) + 'م جنيه';
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'الشهر'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createCostBreakdownChart() {
+            const ctx = document.getElementById('costBreakdownChart');
+            if (!ctx) return;
+            
+            if (charts.costBreakdown) {
+                charts.costBreakdown.destroy();
+            }
+            
+            const costData = [
+                parseFloat(document.getElementById('infraTotal').textContent.replace(/,/g, '')),
+                parseFloat(document.getElementById('flockTotal').textContent.replace(/,/g, '')),
+                parseFloat(document.getElementById('workingCapital').textContent.replace(/,/g, '')),
+                parseFloat(document.getElementById('monthlyOperating').textContent.replace(/,/g, '')) * 12
+            ];
+            
+            charts.costBreakdown = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['البنية التحتية', 'القطيع', 'رأس المال', 'تشغيل سنوي'],
+                    datasets: [{
+                        label: 'التكلفة (جنيه)',
+                        data: costData,
+                        backgroundColor: [
+                            '#3498db',
+                            '#e74c3c',
+                            '#f39c12',
+                            '#9b59b6'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'توزيع التكاليف'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return (value / 1000).toFixed(0) + 'ألف';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Multi-year planning functions
+        function calculateMultiYear() {
+            const flockGrowth = parseFloat(document.getElementById('flockGrowthRate').value) || 25;
+            const productivityGrowth = parseFloat(document.getElementById('productivityImprovement').value) || 5;
+            const priceInflation = parseFloat(document.getElementById('priceInflation').value) || 8;
+            const costInflation = parseFloat(document.getElementById('costInflation').value) || 6;
+            
+            const expansion2 = parseFloat(document.getElementById('expansion2').value) || 0;
+            const expansion3 = parseFloat(document.getElementById('expansion3').value) || 0;
+            const expansion5 = parseFloat(document.getElementById('expansion5').value) || 0;
+            
+            // Base year values
+            const baseRevenue = parseFloat(document.getElementById('yearOneRevenue').textContent.replace(/,/g, ''));
+            const baseCosts = parseFloat(document.getElementById('yearOneCosts').textContent.replace(/,/g, ''));
+            const baseInvestment = parseFloat(document.getElementById('totalInvestment').textContent.replace(/,/g, ''));
+            const baseFlock = parseFloat(document.getElementById('initialSheep').value);
+            
+            const projections = [];
+            
+            for (let year = 1; year <= 5; year++) {
+                const flockSize = Math.round(baseFlock * Math.pow(1 + flockGrowth/100, year - 1));
+                const revenue = baseRevenue * Math.pow(1 + priceInflation/100, year - 1) * Math.pow(1 + productivityGrowth/100, year - 1);
+                const operatingCosts = (baseCosts - baseInvestment) * Math.pow(1 + costInflation/100, year - 1);
+                
+                let additionalInvestment = 0;
+                if (year === 2) additionalInvestment = expansion2;
+                if (year === 3) additionalInvestment = expansion3;
+                if (year === 5) additionalInvestment = expansion5;
+                
+                const totalCosts = operatingCosts + additionalInvestment;
+                const profit = revenue - totalCosts;
+                const roi = baseInvestment > 0 ? (profit / baseInvestment * 100) : 0;
+                
+                projections.push({
+                    year,
+                    flockSize,
+                    revenue: Math.round(revenue),
+                    costs: Math.round(totalCosts),
+                    profit: Math.round(profit),
+                    roi: roi.toFixed(1),
+                    investment: additionalInvestment
+                });
+            }
+            
+            updateMultiYearTable(projections);
+            createMultiYearCharts(projections);
+        }
+        
+        function updateMultiYearTable(projections) {
+            const tbody = document.getElementById('fiveYearTableBody');
+            if (!tbody) return;
+            
+            const rows = [
+                ['عدد الأغنام', projections.map(p => p.flockSize.toLocaleString())],
+                ['الإيرادات', projections.map(p => p.revenue.toLocaleString())],
+                ['التكاليف', projections.map(p => p.costs.toLocaleString())],
+                ['صافي الربح', projections.map(p => p.profit.toLocaleString())],
+                ['العائد %', projections.map(p => p.roi + '%')],
+                ['استثمارات إضافية', projections.map(p => p.investment.toLocaleString())]
+            ];
+            
+            tbody.innerHTML = rows.map(([label, values]) => `
+                <tr>
+                    <td style="padding: 6px; border: 1px solid #ddd; font-weight: bold; background: #f8f9fa;">${label}</td>
+                    ${values.map(value => `<td style="padding: 6px; border: 1px solid #ddd; text-align: center;">${value}</td>`).join('')}
+                </tr>
+            `).join('');
+        }
+        
+        function createMultiYearCharts(projections) {
+            createMultiYearRevenueChart(projections);
+            createFlockGrowthChart(projections);
+        }
+        
+        function createMultiYearRevenueChart(projections) {
+            const ctx = document.getElementById('multiYearRevenueChart');
+            if (!ctx) return;
+            
+            if (charts.multiYearRevenue) {
+                charts.multiYearRevenue.destroy();
+            }
+            
+            charts.multiYearRevenue = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: projections.map(p => `السنة ${p.year}`),
+                    datasets: [
+                        {
+                            label: 'الإيرادات',
+                            data: projections.map(p => p.revenue),
+                            borderColor: '#2ecc71',
+                            backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'التكاليف',
+                            data: projections.map(p => p.costs),
+                            borderColor: '#e74c3c',
+                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'صافي الربح',
+                            data: projections.map(p => p.profit),
+                            borderColor: '#3498db',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'الأداء المالي على 5 سنوات'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return (value / 1000000).toFixed(1) + 'م';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createFlockGrowthChart(projections) {
+            const ctx = document.getElementById('flockGrowthChart');
+            if (!ctx) return;
+            
+            if (charts.flockGrowth) {
+                charts.flockGrowth.destroy();
+            }
+            
+            charts.flockGrowth = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: projections.map(p => `السنة ${p.year}`),
+                    datasets: [{
+                        label: 'عدد الأغنام',
+                        data: projections.map(p => p.flockSize),
+                        backgroundColor: '#9b59b6',
+                        borderColor: '#8e44ad',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'نمو حجم القطيع'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + ' رأس';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Feed optimizer functions
+        function optimizeFeed() {
+            // Simple feed optimization algorithm
+            const cornPrice = parseFloat(document.getElementById('cornPrice').value) || 8000;
+            const soybeanPrice = parseFloat(document.getElementById('soybeanPrice').value) || 15000;
+            const wheatBranPrice = parseFloat(document.getElementById('wheatBranPrice').value) || 6000;
+            const barleyPrice = parseFloat(document.getElementById('barleyPrice').value) || 7000;
+            const concentratePrice = parseFloat(document.getElementById('concentratePrice').value) || 12000;
+            const alfalfaPrice = parseFloat(document.getElementById('alfalfaPrice').value) || 4000;
+            
+            const requiredProtein = parseFloat(document.getElementById('requiredProtein').value) || 16;
+            const requiredEnergy = parseFloat(document.getElementById('requiredEnergy').value) || 2.8;
+            const maxFiber = parseFloat(document.getElementById('maxFiber').value) || 18;
+            
+            // Feed components with nutritional values
+            const feeds = {
+                corn: { price: cornPrice, protein: 8, energy: 3.2, fiber: 2 },
+                soybean: { price: soybeanPrice, protein: 44, energy: 2.2, fiber: 6 },
+                wheatBran: { price: wheatBranPrice, protein: 15, energy: 2.0, fiber: 12 },
+                barley: { price: barleyPrice, protein: 11, energy: 2.8, fiber: 5 },
+                concentrate: { price: concentratePrice, protein: 18, energy: 2.7, fiber: 8 },
+                alfalfa: { price: alfalfaPrice, protein: 17, energy: 2.2, fiber: 28 }
+            };
+            
+            // Simple optimization (this is a simplified version)
+            // In real implementation, you would use linear programming
+            let bestCost = Infinity;
+            let bestFormula = null;
+            
+            // Try different combinations
+            for (let corn = 20; corn <= 50; corn += 5) {
+                for (let soybean = 10; soybean <= 25; soybean += 5) {
+                    for (let concentrate = 15; concentrate <= 35; concentrate += 5) {
+                        const remaining = 100 - corn - soybean - concentrate;
+                        if (remaining < 0) continue;
+                        
+                        const alfalfa = Math.min(remaining, 30);
+                        const wheatBran = remaining - alfalfa;
+                        
+                        if (wheatBran < 0) continue;
+                        
+                        const formula = { corn, soybean, wheatBran, concentrate, alfalfa, barley: 0 };
+                        
+                        // Calculate nutritional values
+                        let totalProtein = 0;
+                        let totalEnergy = 0;
+                        let totalFiber = 0;
+                        let totalCost = 0;
+                        
+                        Object.entries(formula).forEach(([feed, percentage]) => {
+                            const feedData = feeds[feed];
+                            totalProtein += (percentage / 100) * feedData.protein;
+                            totalEnergy += (percentage / 100) * feedData.energy;
+                            totalFiber += (percentage / 100) * feedData.fiber;
+                            totalCost += (percentage / 100) * feedData.price;
+                        });
+                        
+                        // Check constraints
+                        if (totalProtein >= requiredProtein && 
+                            totalEnergy >= requiredEnergy && 
+                            totalFiber <= maxFiber &&
+                            totalCost < bestCost) {
+                            bestCost = totalCost;
+                            bestFormula = {
+                                formula,
+                                protein: totalProtein.toFixed(1),
+                                energy: totalEnergy.toFixed(1),
+                                fiber: totalFiber.toFixed(1),
+                                cost: totalCost.toFixed(0)
+                            };
+                        }
+                    }
+                }
+            }
+            
+            updateFeedFormula(bestFormula);
+            createFeedCompositionChart(bestFormula);
+        }
+        
+        function updateFeedFormula(formula) {
+            const container = document.getElementById('optimalFormula');
+            const costElement = document.getElementById('optimalCost');
+            
+            if (!formula) {
+                container.innerHTML = '<p style="color: red;">لم يتم العثور على تركيبة مثلى تحقق المتطلبات</p>';
+                costElement.textContent = 'غير محدد';
+                return;
+            }
+            
+            const feedNames = {
+                corn: 'ذرة',
+                soybean: 'كسب فول صويا',
+                wheatBran: 'نخالة قمح',
+                barley: 'شعير',
+                concentrate: 'علف مركز',
+                alfalfa: 'دريس برسيم'
+            };
+            
+            const formulaHTML = Object.entries(formula.formula)
+                .filter(([, percentage]) => percentage > 0)
+                .map(([feed, percentage]) => 
+                    `<div style="margin: 5px 0;"><strong>${feedNames[feed]}:</strong> ${percentage}%</div>`
+                ).join('');
+            
+            container.innerHTML = `
+                <div style="margin-bottom: 10px;">${formulaHTML}</div>
+                <div style="background: #e8f4f8; padding: 8px; border-radius: 4px; font-size: 0.9em;">
+                    <div><strong>البروتين:</strong> ${formula.protein}%</div>
+                    <div><strong>الطاقة:</strong> ${formula.energy} ميجا كالوري/كجم</div>
+                    <div><strong>الألياف:</strong> ${formula.fiber}%</div>
+                </div>
+            `;
+            
+            costElement.textContent = formula.cost;
+        }
+        
+        function createFeedCompositionChart(formula) {
+            const ctx = document.getElementById('feedCompositionChart');
+            if (!ctx || !formula) return;
+            
+            if (charts.feedComposition) {
+                charts.feedComposition.destroy();
+            }
+            
+            const feedNames = {
+                corn: 'ذرة',
+                soybean: 'كسب فول صويا',
+                wheatBran: 'نخالة قمح',
+                barley: 'شعير',
+                concentrate: 'علف مركز',
+                alfalfa: 'دريس برسيم'
+            };
+            
+            const data = Object.entries(formula.formula)
+                .filter(([, percentage]) => percentage > 0)
+                .map(([feed, percentage]) => ({ feed: feedNames[feed], percentage }));
+            
+            charts.feedComposition = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: data.map(d => d.feed),
+                    datasets: [{
+                        data: data.map(d => d.percentage),
+                        backgroundColor: [
+                            '#f39c12',
+                            '#e74c3c',
+                            '#3498db',
+                            '#2ecc71',
+                            '#9b59b6',
+                            '#1abc9c'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'تركيبة العلف المثلى'
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Breeding calendar functions
+        function generateBreedingCalendar() {
+            const breeding1Start = new Date(document.getElementById('breeding1Start').value);
+            const breeding2Start = new Date(document.getElementById('breeding2Start').value);
+            const breedingDuration = parseInt(document.getElementById('breedingDuration').value) || 45;
+            const gestationDays = parseInt(document.getElementById('gestationDays').value) || 150;
+            const lactationDays = parseInt(document.getElementById('lactationPeriod').value) || 90;
+            
+            const events = [];
+            
+            // First breeding season
+            events.push({
+                date: new Date(breeding1Start),
+                event: 'بداية موسم التلقيح الأول',
+                type: 'breeding',
+                priority: 'high'
+            });
+            
+            const breeding1End = new Date(breeding1Start);
+            breeding1End.setDate(breeding1End.getDate() + breedingDuration);
+            events.push({
+                date: new Date(breeding1End),
+                event: 'نهاية موسم التلقيح الأول',
+                type: 'breeding',
+                priority: 'medium'
+            });
+            
+            const birth1Start = new Date(breeding1Start);
+            birth1Start.setDate(birth1Start.setDate() + gestationDays);
+            events.push({
+                date: new Date(birth1Start),
+                event: 'بداية موسم الولادة الأول',
+                type: 'birth',
+                priority: 'high'
+            });
+            
+            const weaning1 = new Date(birth1Start);
+            weaning1.setDate(weaning1.getDate() + lactationDays);
+            events.push({
+                date: new Date(weaning1),
+                event: 'فطام مجموعة 1',
+                type: 'weaning',
+                priority: 'medium'
+            });
+            
+            // Second breeding season
+            events.push({
+                date: new Date(breeding2Start),
+                event: 'بداية موسم التلقيح الثاني',
+                type: 'breeding',
+                priority: 'high'
+            });
+            
+            const birth2Start = new Date(breeding2Start);
+            birth2Start.setDate(birth2Start.getDate() + gestationDays);
+            events.push({
+                date: new Date(birth2Start),
+                event: 'بداية موسم الولادة الثاني',
+                type: 'birth',
+                priority: 'high'
+            });
+            
+            // Sort events by date
+            events.sort((a, b) => a.date - b.date);
+            
+            displayBreedingSchedule(events);
+            createProductionTimelineChart(events);
+        }
+        
+        function displayBreedingSchedule(events) {
+            const container = document.getElementById('breedingSchedule');
+            if (!container) return;
+            
+            const eventIcons = {
+                breeding: '🐑',
+                birth: '🐣',
+                weaning: '🌿'
+            };
+            
+            const eventColors = {
+                high: '#e74c3c',
+                medium: '#f39c12',
+                low: '#2ecc71'
+            };
+            
+            const eventsHTML = events.map(event => {
+                const dateStr = event.date.toLocaleDateString('ar-EG', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                
+                return `
+                    <div style="margin: 8px 0; padding: 8px; background: white; border-radius: 4px; border-left: 4px solid ${eventColors[event.priority]};">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-weight: bold;">${eventIcons[event.type]} ${event.event}</span>
+                            <span style="color: #666; font-size: 0.9em;">${dateStr}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = `
+                <h4 style="margin-bottom: 10px; color: #2c3e50;">الأحداث القادمة:</h4>
+                ${eventsHTML}
+            `;
+        }
+        
+        function createProductionTimelineChart(events) {
+            const ctx = document.getElementById('productionTimelineChart');
+            if (!ctx) return;
+            
+            if (charts.productionTimeline) {
+                charts.productionTimeline.destroy();
+            }
+            
+            // Create monthly production data
+            const monthlyData = Array(12).fill(0);
+            const ewes = parseInt(document.getElementById('ewes').value) || 30;
+            const birthRate = parseFloat(document.getElementById('birthRate').value) || 150;
+            const lambsPerBirth = parseFloat(document.getElementById('lambsPerBirth').value) || 1.3;
+            
+            events.filter(e => e.type === 'birth').forEach(event => {
+                const month = event.date.getMonth();
+                const expectedLambs = ewes * (birthRate / 100) * lambsPerBirth;
+                monthlyData[month] += expectedLambs;
+            });
+            
+            charts.productionTimeline = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'],
+                    datasets: [{
+                        label: 'عدد المواليد المتوقعة',
+                        data: monthlyData,
+                        backgroundColor: '#3498db',
+                        borderColor: '#2980b9',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'توزيع المواليد على مدار العام'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return Math.round(value) + ' مولود';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Sensitivity analysis functions
+        function runSensitivityAnalysis() {
+            const priceVar = parseFloat(document.getElementById('priceVariation').value) || 20;
+            const feedCostVar = parseFloat(document.getElementById('feedCostVariation').value) || 25;
+            const birthRateVar = parseFloat(document.getElementById('birthRateVariation').value) || 15;
+            const mortalityVar = parseFloat(document.getElementById('mortalityVariation').value) || 10;
+            const demandVar = parseFloat(document.getElementById('demandVariation').value) || 30;
+            const monteCarloRuns = parseInt(document.getElementById('monteCarloRuns').value) || 1000;
+            
+            // Base values
+            const baseProfit = parseFloat(document.getElementById('yearOneProfit').textContent.replace(/,/g, ''));
+            const basePrice = parseFloat(document.getElementById('udheyaPrice').value);
+            const baseFeedCost = parseFloat(document.getElementById('feedPriceTon').value);
+            const baseBirthRate = parseFloat(document.getElementById('birthRate').value);
+            const baseMortality = parseFloat(document.getElementById('mortalityRate').value);
+            const baseDemand = parseFloat(document.getElementById('udheyaCustomers').value);
+            
+            // Tornado analysis
+            const sensitivities = [];
+            
+            // Price sensitivity
+            const highPrice = calculateSensitivityProfit('udheyaPrice', basePrice * (1 + priceVar/100));
+            const lowPrice = calculateSensitivityProfit('udheyaPrice', basePrice * (1 - priceVar/100));
+            sensitivities.push({
+                variable: 'أسعار البيع',
+                high: highPrice - baseProfit,
+                low: lowPrice - baseProfit
+            });
+            
+            // Feed cost sensitivity
+            const highFeedCost = calculateSensitivityProfit('feedPriceTon', baseFeedCost * (1 + feedCostVar/100));
+            const lowFeedCost = calculateSensitivityProfit('feedPriceTon', baseFeedCost * (1 - feedCostVar/100));
+            sensitivities.push({
+                variable: 'تكاليف العلف',
+                high: highFeedCost - baseProfit,
+                low: lowFeedCost - baseProfit
+            });
+            
+            // Birth rate sensitivity
+            const highBirthRate = calculateSensitivityProfit('birthRate', baseBirthRate * (1 + birthRateVar/100));
+            const lowBirthRate = calculateSensitivityProfit('birthRate', baseBirthRate * (1 - birthRateVar/100));
+            sensitivities.push({
+                variable: 'معدل الولادة',
+                high: highBirthRate - baseProfit,
+                low: lowBirthRate - baseProfit
+            });
+            
+            // Demand sensitivity
+            const highDemand = calculateSensitivityProfit('udheyaCustomers', baseDemand * (1 + demandVar/100));
+            const lowDemand = calculateSensitivityProfit('udheyaCustomers', baseDemand * (1 - demandVar/100));
+            sensitivities.push({
+                variable: 'الطلب',
+                high: highDemand - baseProfit,
+                low: lowDemand - baseProfit
+            });
+            
+            // Run Monte Carlo simulation
+            const monteCarloResults = runMonteCarloSimulation(monteCarloRuns, {
+                priceVar, feedCostVar, birthRateVar, mortalityVar, demandVar
+            });
+            
+            // Display results
+            createSensitivityChart(sensitivities);
+            createMonteCarloChart(monteCarloResults);
+            displayRiskAssessment(monteCarloResults, baseProfit);
+        }
+        
+        function calculateSensitivityProfit(variableId, newValue) {
+            const originalValue = document.getElementById(variableId).value;
+            document.getElementById(variableId).value = newValue;
+            calculateAll();
+            const profit = parseFloat(document.getElementById('yearOneProfit').textContent.replace(/,/g, ''));
+            document.getElementById(variableId).value = originalValue;
+            calculateAll();
+            return profit;
+        }
+        
+        function runMonteCarloSimulation(runs, variations) {
+            const results = [];
+            const baseValues = {
+                udheyaPrice: parseFloat(document.getElementById('udheyaPrice').value),
+                feedPriceTon: parseFloat(document.getElementById('feedPriceTon').value),
+                birthRate: parseFloat(document.getElementById('birthRate').value),
+                mortalityRate: parseFloat(document.getElementById('mortalityRate').value),
+                udheyaCustomers: parseFloat(document.getElementById('udheyaCustomers').value)
+            };
+            
+            for (let i = 0; i < runs; i++) {
+                // Generate random variations
+                const priceMultiplier = 1 + (Math.random() - 0.5) * 2 * (variations.priceVar / 100);
+                const feedCostMultiplier = 1 + (Math.random() - 0.5) * 2 * (variations.feedCostVar / 100);
+                const birthRateMultiplier = 1 + (Math.random() - 0.5) * 2 * (variations.birthRateVar / 100);
+                const mortalityMultiplier = 1 + (Math.random() - 0.5) * 2 * (variations.mortalityVar / 100);
+                const demandMultiplier = 1 + (Math.random() - 0.5) * 2 * (variations.demandVar / 100);
+                
+                // Apply variations
+                document.getElementById('udheyaPrice').value = baseValues.udheyaPrice * priceMultiplier;
+                document.getElementById('feedPriceTon').value = baseValues.feedPriceTon * feedCostMultiplier;
+                document.getElementById('birthRate').value = baseValues.birthRate * birthRateMultiplier;
+                document.getElementById('mortalityRate').value = Math.max(0, baseValues.mortalityRate * mortalityMultiplier);
+                document.getElementById('udheyaCustomers').value = Math.max(0, baseValues.udheyaCustomers * demandMultiplier);
+                
+                calculateAll();
+                const profit = parseFloat(document.getElementById('yearOneProfit').textContent.replace(/,/g, ''));
+                results.push(profit);
+            }
+            
+            // Restore original values
+            Object.entries(baseValues).forEach(([id, value]) => {
+                document.getElementById(id).value = value;
+            });
+            calculateAll();
+            
+            return results;
+        }
+        
+        function createSensitivityChart(sensitivities) {
+            const ctx = document.getElementById('sensitivityChart');
+            if (!ctx) return;
+            
+            if (charts.sensitivity) {
+                charts.sensitivity.destroy();
+            }
+            
+            const data = sensitivities.map(s => [s.low, s.high]);
+            const labels = sensitivities.map(s => s.variable);
+            
+            charts.sensitivity = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'تأثير سلبي',
+                            data: sensitivities.map(s => s.low),
+                            backgroundColor: '#e74c3c'
+                        },
+                        {
+                            label: 'تأثير إيجابي',
+                            data: sensitivities.map(s => s.high),
+                            backgroundColor: '#2ecc71'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'تحليل الحساسية (رسم الإعصار)'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: false
+                        },
+                        y: {
+                            ticks: {
+                                callback: function(value) {
+                                    return (value / 1000).toFixed(0) + 'ألف';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createMonteCarloChart(results) {
+            const ctx = document.getElementById('monteCarloChart');
+            if (!ctx) return;
+            
+            if (charts.monteCarlo) {
+                charts.monteCarlo.destroy();
+            }
+            
+            // Create histogram
+            const bins = 20;
+            const min = Math.min(...results);
+            const max = Math.max(...results);
+            const binSize = (max - min) / bins;
+            const histogram = Array(bins).fill(0);
+            const labels = [];
+            
+            for (let i = 0; i < bins; i++) {
+                const binStart = min + i * binSize;
+                const binEnd = binStart + binSize;
+                labels.push((binStart / 1000).toFixed(0) + '-' + (binEnd / 1000).toFixed(0));
+                
+                results.forEach(result => {
+                    if (result >= binStart && result < binEnd) {
+                        histogram[i]++;
+                    }
+                });
+            }
+            
+            charts.monteCarlo = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'تكرار النتائج',
+                        data: histogram,
+                        backgroundColor: '#3498db',
+                        borderColor: '#2980b9',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'محاكاة مونت كارلو - توزيع الأرباح'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'صافي الربح (ألف جنيه)'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'عدد مرات الحدوث'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function displayRiskAssessment(results, baseProfit) {
+            const container = document.getElementById('riskAssessment');
+            if (!container) return;
+            
+            const profitable = results.filter(r => r > 0).length;
+            const profitabilityPercentage = (profitable / results.length * 100).toFixed(1);
+            
+            const mean = results.reduce((sum, r) => sum + r, 0) / results.length;
+            const sorted = results.sort((a, b) => a - b);
+            const percentile5 = sorted[Math.floor(results.length * 0.05)];
+            const percentile95 = sorted[Math.floor(results.length * 0.95)];
+            const median = sorted[Math.floor(results.length * 0.5)];
+            
+            const worstCase = Math.min(...results);
+            const bestCase = Math.max(...results);
+            
+            let riskLevel = 'منخفض';
+            let riskColor = '#2ecc71';
+            
+            if (profitabilityPercentage < 60) {
+                riskLevel = 'عالي';
+                riskColor = '#e74c3c';
+            } else if (profitabilityPercentage < 80) {
+                riskLevel = 'متوسط';
+                riskColor = '#f39c12';
+            }
+            
+            container.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div style="background: white; padding: 10px; border-radius: 6px; border-left: 4px solid ${riskColor};">
+                        <h4 style="color: ${riskColor}; margin-bottom: 8px;">مستوى المخاطرة: ${riskLevel}</h4>
+                        <p>نسبة الربحية: ${profitabilityPercentage}%</p>
+                    </div>
+                    
+                    <div style="background: white; padding: 10px; border-radius: 6px;">
+                        <h4 style="color: #2c3e50; margin-bottom: 8px;">القيم المتوقعة</h4>
+                        <p>المتوسط: ${mean.toLocaleString()} جنيه</p>
+                        <p>الوسيط: ${median.toLocaleString()} جنيه</p>
+                    </div>
+                    
+                    <div style="background: white; padding: 10px; border-radius: 6px;">
+                        <h4 style="color: #2c3e50; margin-bottom: 8px;">نطاق الثقة (90%)</h4>
+                        <p>الحد الأدنى: ${percentile5.toLocaleString()}</p>
+                        <p>الحد الأعلى: ${percentile95.toLocaleString()}</p>
+                    </div>
+                    
+                    <div style="background: white; padding: 10px; border-radius: 6px;">
+                        <h4 style="color: #2c3e50; margin-bottom: 8px;">السيناريوهات المتطرفة</h4>
+                        <p style="color: #e74c3c;">الأسوأ: ${worstCase.toLocaleString()}</p>
+                        <p style="color: #2ecc71;">الأفضل: ${bestCase.toLocaleString()}</p>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 15px; padding: 10px; background: #e8f4f8; border-radius: 6px;">
+                    <h4 style="color: #2c3e50; margin-bottom: 8px;">توصيات إدارة المخاطر:</h4>
+                    <ul style="margin: 0; padding-right: 20px;">
+                        ${profitabilityPercentage < 70 ? '<li>اعتبر زيادة الاحتياطيات النقدية</li>' : ''}
+                        <li>مراقبة أسعار العلف بانتظام</li>
+                        <li>تنويع مصادر الإيرادات</li>
+                        <li>وضع خطة للطوارئ البيطرية</li>
+                        ${profitabilityPercentage > 85 ? '<li style="color: #2ecc71;">المشروع يظهر مخاطر منخفضة وربحية عالية</li>' : ''}
+                    </ul>
+                </div>
+            `;
+        }
+        
+        // Market Intelligence Functions
+        function createPriceTrendsChart() {
+            const ctx = document.getElementById('priceTrendsChart');
+            if (!ctx) return;
+            
+            if (charts.priceeTrends) {
+                charts.priceTrends.destroy();
+            }
+            
+            const price2021 = parseFloat(document.getElementById('price2021').value) || 6500;
+            const price2022 = parseFloat(document.getElementById('price2022').value) || 7000;
+            const price2023 = parseFloat(document.getElementById('price2023').value) || 7500;
+            const currentPrice = parseFloat(document.getElementById('udheyaPrice').value) || 8000;
+            
+            // Generate seasonal pattern
+            const basePrice = currentPrice;
+            const ramadanIncrease = parseFloat(document.getElementById('ramadanPriceIncrease').value) || 15;
+            const hajjIncrease = parseFloat(document.getElementById('hajjPriceIncrease').value) || 25;
+            const summerDecrease = parseFloat(document.getElementById('summerPriceDecrease').value) || 10;
+            
+            const monthlyPrices = [
+                basePrice * (1 - summerDecrease/100), // Jan
+                basePrice * (1 - summerDecrease/100), // Feb
+                basePrice, // Mar
+                basePrice * (1 + ramadanIncrease/100), // Apr (Ramadan)
+                basePrice, // May
+                basePrice * (1 - summerDecrease/100), // Jun
+                basePrice * (1 + hajjIncrease/100), // Jul (Hajj)
+                basePrice, // Aug
+                basePrice, // Sep
+                basePrice, // Oct
+                basePrice, // Nov
+                basePrice * (1 + hajjIncrease/100) // Dec (Hajj)
+            ];
+            
+            charts.priceTrends = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'],
+                    datasets: [
+                        {
+                            label: '2021',
+                            data: monthlyPrices.map(p => price2021 * (p / basePrice)),
+                            borderColor: '#95a5a6',
+                            backgroundColor: 'rgba(149, 165, 166, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: '2022',
+                            data: monthlyPrices.map(p => price2022 * (p / basePrice)),
+                            borderColor: '#3498db',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: '2023',
+                            data: monthlyPrices.map(p => price2023 * (p / basePrice)),
+                            borderColor: '#e74c3c',
+                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: '2024 (توقع)',
+                            data: monthlyPrices,
+                            borderColor: '#2ecc71',
+                            backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                            tension: 0.4,
+                            borderWidth: 3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'اتجاهات أسعار الأضاحي'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString() + ' جنيه';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createDemandForecastChart() {
+            const ctx = document.getElementById('demandForecastChart');
+            if (!ctx) return;
+            
+            if (charts.demandForecast) {
+                charts.demandForecast.destroy();
+            }
+            
+            const totalFamilies = parseFloat(document.getElementById('totalFamilies').value) || 5000;
+            const sacrificePercentage = parseFloat(document.getElementById('sacrificePercentage').value) || 70;
+            const populationGrowth = parseFloat(document.getElementById('populationGrowth').value) || 2.5;
+            const purchasingPowerGrowth = parseFloat(document.getElementById('purchasingPowerGrowth').value) || 5;
+            
+            const currentDemand = totalFamilies * (sacrificePercentage / 100);
+            const years = ['2024', '2025', '2026', '2027', '2028'];
+            const demandProjection = [];
+            
+            for (let i = 0; i < 5; i++) {
+                const populationFactor = Math.pow(1 + populationGrowth/100, i);
+                const purchasingFactor = Math.pow(1 + purchasingPowerGrowth/100, i);
+                const demand = currentDemand * populationFactor * Math.min(purchasingFactor, 1.3); // Cap purchasing power effect
+                demandProjection.push(Math.round(demand));
+            }
+            
+            charts.demandForecast = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: years,
+                    datasets: [{
+                        label: 'الطلب المتوقع',
+                        data: demandProjection,
+                        backgroundColor: '#9b59b6',
+                        borderColor: '#8e44ad',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'توقع الطلب على الأضاحي'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString() + ' أضحية';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Compliance Functions
+        function initializeCompliance() {
+            const basicDocs = [
+                { name: 'السجل التجاري', completed: false, cost: 2000, renewal: 'سنوي' },
+                { name: 'البطاقة الضريبية', completed: false, cost: 500, renewal: 'مرة واحدة' },
+                { name: 'رخصة مزاولة النشاط', completed: false, cost: 5000, renewal: 'سنوي' },
+                { name: 'ترخيص بيئي', completed: false, cost: 8000, renewal: '3 سنوات' },
+                { name: 'رخصة بناء', completed: false, cost: 15000, renewal: 'مرة واحدة' }
+            ];
+            
+            const qualityDocs = [
+                { name: 'شهادة الذبح الحلال', completed: false, cost: 15000, renewal: 'سنوي' },
+                { name: 'ISO 22000', completed: false, cost: 50000, renewal: '3 سنوات' },
+                { name: 'شهادة HACCP', completed: false, cost: 25000, renewal: 'سنوي' },
+                { name: 'ترخيص وزارة الصحة', completed: false, cost: 10000, renewal: 'سنوي' },
+                { name: 'شهادة جودة مصرية', completed: false, cost: 20000, renewal: '3 سنوات' }
+            ];
+            
+            const exportDocs = [
+                { name: 'رخصة تصدير', completed: false, cost: 25000, renewal: 'سنوي' },
+                { name: 'شهادة منشأ مصري', completed: false, cost: 5000, renewal: 'لكل شحنة' },
+                { name: 'شهادة بيطرية', completed: false, cost: 3000, renewal: 'لكل شحنة' },
+                { name: 'ترخيص جمارك', completed: false, cost: 8000, renewal: 'سنوي' },
+                { name: 'شهادة مطابقة خليجية', completed: false, cost: 15000, renewal: 'سنوي' }
+            ];
+            
+            displayDocumentChecklist('basicDocuments', basicDocs);
+            displayDocumentChecklist('qualityDocuments', qualityDocs);
+            displayDocumentChecklist('exportDocuments', exportDocs);
+            
+            updateComplianceChart();
+        }
+        
+        function displayDocumentChecklist(containerId, documents) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            container.innerHTML = documents.map((doc, index) => `
+                <div style="margin: 5px 0; padding: 8px; background: white; border-radius: 4px; border: 1px solid #ddd;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" onchange="toggleDocumentStatus('${containerId}', ${index})" style="margin: 0;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold; font-size: 0.8em;">${doc.name}</div>
+                            <div style="font-size: 0.7em; color: #666;">${doc.cost.toLocaleString()} جنيه - ${doc.renewal}</div>
+                        </div>
+                    </label>
+                </div>
+            `).join('');
+        }
+        
+        function toggleDocumentStatus(containerId, index) {
+            // This would update the document status in a real application
+            updateComplianceChart();
+        }
+        
+        function updateComplianceChart() {
+            const ctx = document.getElementById('complianceChart');
+            if (!ctx) return;
+            
+            if (charts.compliance) {
+                charts.compliance.destroy();
+            }
+            
+            // Count completed documents (this would be dynamic in a real app)
+            const totalDocs = 15;
+            const completedDocs = Math.floor(Math.random() * 8) + 3; // Simulate some completed
+            const pendingDocs = totalDocs - completedDocs;
+            
+            charts.compliance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['مكتمل', 'معلق'],
+                    datasets: [{
+                        data: [completedDocs, pendingDocs],
+                        backgroundColor: ['#2ecc71', '#e74c3c']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'حالة الوثائق'
+                        }
+                    }
+                }
+            });
+            
+            // Update summary
+            const summary = document.getElementById('complianceSummary');
+            if (summary) {
+                const completionRate = (completedDocs / totalDocs * 100).toFixed(1);
+                summary.innerHTML = `
+                    <div style="margin: 5px 0;"><strong>نسبة الإنجاز:</strong> ${completionRate}%</div>
+                    <div style="margin: 5px 0;"><strong>مكتمل:</strong> ${completedDocs} من ${totalDocs}</div>
+                    <div style="margin: 5px 0;"><strong>متبقي:</strong> ${pendingDocs} وثيقة</div>
+                    <div style="margin: 10px 0; padding: 8px; background: ${completionRate > 80 ? '#d4edda' : completionRate > 60 ? '#fff3cd' : '#f8d7da'}; border-radius: 4px; font-size: 0.8em;">
+                        ${completionRate > 80 ? '✅ مستوى ممتاز من الالتزام' : 
+                          completionRate > 60 ? '⚠️ يحتاج إلى تحسين' : 
+                          '❌ يتطلب عمل فوري'}
+                    </div>
+                `;
+            }
+        }
+        
+        // Operational Tools Functions
+        function simulateOutbreak() {
+            const diseaseType = document.getElementById('diseaseType').value;
+            const infectionRate = parseFloat(document.getElementById('infectionRate').value) || 30;
+            const diseaseMortality = parseFloat(document.getElementById('diseaseMortality').value) || 15;
+            const treatmentCost = parseFloat(document.getElementById('treatmentCost').value) || 500;
+            const weightLoss = parseFloat(document.getElementById('weightLoss').value) || 20;
+            const flockSize = parseFloat(document.getElementById('initialSheep').value) || 50;
+            const animalValue = parseFloat(document.getElementById('sheepCost').value) || 3500;
+            
+            const infectedAnimals = Math.round(flockSize * infectionRate / 100);
+            const deaths = Math.round(infectedAnimals * diseaseMortality / 100);
+            const recoveredAnimals = infectedAnimals - deaths;
+            
+            const treatmentCosts = infectedAnimals * treatmentCost;
+            const mortalityLoss = deaths * animalValue;
+            const weightLossValue = recoveredAnimals * animalValue * (weightLoss / 100);
+            const totalLoss = treatmentCosts + mortalityLoss + weightLossValue;
+            
+            const diseaseNames = {
+                ppr: 'طاعون المجترات الصغيرة',
+                fmd: 'الحمى القلاعية',
+                parasites: 'الطفيليات',
+                respiratory: 'أمراض تنفسية'
+            };
+            
+            const results = document.getElementById('outbreakResults');
+            results.innerHTML = `
+                <h4>تأثير تفشي ${diseaseNames[diseaseType]}:</h4>
+                <div style="margin: 8px 0; padding: 6px; background: white; border-radius: 4px;">
+                    <strong>عدد الحيوانات المصابة:</strong> ${infectedAnimals} (${infectionRate}%)
+                </div>
+                <div style="margin: 8px 0; padding: 6px; background: white; border-radius: 4px;">
+                    <strong>عدد النفوق:</strong> ${deaths} رأس
+                </div>
+                <div style="margin: 8px 0; padding: 6px; background: white; border-radius: 4px;">
+                    <strong>تكلفة العلاج:</strong> ${treatmentCosts.toLocaleString()} جنيه
+                </div>
+                <div style="margin: 8px 0; padding: 6px; background: white; border-radius: 4px;">
+                    <strong>خسائر النفوق:</strong> ${mortalityLoss.toLocaleString()} جنيه
+                </div>
+                <div style="margin: 8px 0; padding: 6px; background: white; border-radius: 4px;">
+                    <strong>خسائر فقدان الوزن:</strong> ${weightLossValue.toLocaleString()} جنيه
+                </div>
+                <div style="margin: 8px 0; padding: 8px; background: #f8d7da; border-radius: 4px; font-weight: bold; color: #721c24;">
+                    <strong>إجمالي الخسائر:</strong> ${totalLoss.toLocaleString()} جنيه
+                </div>
+                <div style="margin: 8px 0; padding: 6px; background: #e8f4f8; border-radius: 4px; font-size: 0.8em;">
+                    <strong>التوصيات:</strong>
+                    <ul style="margin: 5px 0; padding-right: 15px;">
+                        <li>زيادة برنامج التحصينات الوقائية</li>
+                        <li>تحسين النظافة والتطهير</li>
+                        <li>زيادة الاحتياطي النقدي بـ${Math.round(totalLoss * 0.1).toLocaleString()} جنيه</li>
+                    </ul>
+                </div>
+            `;
+        }
+        
+        function optimizeSchedule() {
+            const dailyHours = parseFloat(document.getElementById('dailyWorkHours').value) || 8;
+            const workDays = parseFloat(document.getElementById('workDaysPerWeek').value) || 6;
+            const workers = parseFloat(document.getElementById('workers').value) || 2;
+            const workerSalary = parseFloat(document.getElementById('workerSalary').value) || 3000;
+            const overtimeRate = parseFloat(document.getElementById('overtimeRate').value) || 50;
+            
+            const weeklyHours = dailyHours * workDays;
+            const monthlyHours = weeklyHours * 4.33;
+            const overtimeThreshold = 48; // Egyptian labor law
+            const overtimeHours = Math.max(0, weeklyHours - overtimeThreshold);
+            
+            const regularPay = workerSalary;
+            const overtimePay = (workerSalary / (overtimeThreshold * 4.33)) * overtimeHours * 4.33 * (1 + overtimeRate/100);
+            const totalMonthlyCost = (regularPay + overtimePay) * workers;
+            
+            const efficiency = Math.min(100, (weeklyHours / 60) * 100); // Optimal around 60 hours/week
+            
+            const results = document.getElementById('scheduleResults');
+            results.innerHTML = `
+                <h4>تحليل جدولة العمل:</h4>
+                <div style="margin: 8px 0; padding: 6px; background: white; border-radius: 4px;">
+                    <strong>ساعات العمل الأسبوعية:</strong> ${weeklyHours} ساعة
+                </div>
+                <div style="margin: 8px 0; padding: 6px; background: white; border-radius: 4px;">
+                    <strong>ساعات إضافية:</strong> ${overtimeHours.toFixed(1)} ساعة/أسبوع
+                </div>
+                <div style="margin: 8px 0; padding: 6px; background: white; border-radius: 4px;">
+                    <strong>التكلفة الشهرية:</strong> ${totalMonthlyCost.toLocaleString()} جنيه
+                </div>
+                <div style="margin: 8px 0; padding: 6px; background: white; border-radius: 4px;">
+                    <strong>كفاءة الجدولة:</strong> ${efficiency.toFixed(1)}%
+                </div>
+                <div style="margin: 8px 0; padding: 6px; background: ${efficiency > 85 ? '#d4edda' : efficiency > 70 ? '#fff3cd' : '#f8d7da'}; border-radius: 4px; font-size: 0.8em;">
+                    ${efficiency > 85 ? '✅ جدولة مثلى' : 
+                      efficiency > 70 ? '⚠️ يمكن تحسينها' : 
+                      '❌ تحتاج إعادة تنظيم'}
+                </div>
+            `;
+        }
+        
+        function updateCurrencyConverter() {
+            const egpAmount = parseFloat(document.getElementById('egpAmount').value) || 0;
+            const usdRate = parseFloat(document.getElementById('usdRate').value) || 31;
+            const eurRate = parseFloat(document.getElementById('eurRate').value) || 33;
+            
+            document.getElementById('usdAmount').value = (egpAmount / usdRate).toFixed(2);
+            document.getElementById('eurAmount').value = (egpAmount / eurRate).toFixed(2);
+        }
+        
+        // Initialize currency converter
+        ['egpAmount', 'usdRate', 'eurRate'].forEach(id => {
+            document.getElementById(id)?.addEventListener('input', updateCurrencyConverter);
+        });
         
         // Initial calculation
         calculateAll();
