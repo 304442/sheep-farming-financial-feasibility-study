@@ -1,0 +1,1580 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسبة جدوى مشروع تربية الأغنام - مصر</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.4;
+            direction: rtl;
+            font-size: 14px;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+        
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 8px 8px 0 0;
+            overflow-x: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: -1px;
+            justify-content: stretch;
+            flex-wrap: nowrap;
+        }
+        
+        .tab {
+            flex: 1 1 auto;
+            min-width: 0;
+            padding: 5px 2px;
+            text-align: center;
+            cursor: pointer;
+            background: #ecf0f1;
+            border: none;
+            border-right: 1px solid #bdc3c7;
+            font-size: 0.65rem;
+            font-weight: bold;
+            transition: all 0.3s;
+            white-space: normal;
+            line-height: 1.2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 35px;
+        }
+        
+        .tab:last-child {
+            border-right: none;
+        }
+        
+        .tab.active {
+            background: white;
+            color: #3498db;
+            border-bottom: 3px solid #3498db;
+            font-weight: bold;
+            border-right-color: transparent;
+        }
+        
+        .tab.active + .tab {
+            border-left: 1px solid transparent;
+        }
+        
+        .tab:hover {
+            background: #d5dbdb;
+            position: relative;
+            z-index: 1;
+            transform: translateY(-1px);
+        }
+        
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 10px;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 6px;
+        }
+        
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 6px;
+        }
+        
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 6px;
+        }
+        
+        .section {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 10px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .section h3 {
+            color: #495057;
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 3px;
+        }
+        
+        .input-group {
+            margin-bottom: 6px;
+        }
+        
+        .input-group-inline {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 3px;
+            color: #555;
+            font-weight: 500;
+            font-size: 0.7rem;
+        }
+        
+        input[type="number"], select {
+            width: 100%;
+            padding: 4px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-size: 12px;
+            transition: border-color 0.3s;
+            direction: ltr;
+            text-align: right;
+        }
+        
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .result {
+            background: #e8f4f8;
+            padding: 6px 8px;
+            border-radius: 4px;
+            margin-top: 6px;
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 0.85rem;
+        }
+        
+        .summary-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .summary-section h2 {
+            color: white;
+            margin-bottom: 12px;
+            text-align: center;
+            font-size: 1.3rem;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        
+        .metric {
+            background: rgba(255,255,255,0.15);
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .metric-label {
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+            opacity: 0.9;
+        }
+        
+        .metric-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+        
+        .decision-box {
+            text-align: center;
+            padding: 10px;
+            margin-top: 8px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        
+        .decision-box.go {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .decision-box.no-go {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .decision-box.maybe {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .info-box {
+            background: #fff3cd;
+            border: 1px solid #ffecc0;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            color: #856404;
+            font-size: 0.8rem;
+        }
+        
+        .compact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 4px;
+        }
+        
+        .compact-input {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .compact-input label {
+            font-size: 0.65rem;
+            margin-bottom: 2px;
+        }
+        
+        .compact-input input, .compact-input select {
+            padding: 4px;
+            font-size: 11px;
+        }
+        
+        .section-compact {
+            background: #f8f9fa;
+            border-radius: 5px;
+            padding: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .section-compact h3 {
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+            padding-bottom: 3px;
+        }
+        
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        
+        .stat-box {
+            background: #3498db;
+            color: white;
+            padding: 6px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .stat-box .value {
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        
+        .stat-box .label {
+            font-size: 0.7rem;
+            opacity: 0.9;
+        }
+        
+        .small-text {
+            font-size: 0.65rem;
+            color: #777;
+            display: block;
+            margin-top: 2px;
+        }
+        
+        @media (max-width: 768px) {
+            .tab {
+                font-size: 0.6rem;
+                padding: 4px 2px;
+            }
+            
+            h1 {
+                font-size: 1.2rem;
+            }
+        }
+        
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .tab {
+                font-size: 0.65rem;
+                padding: 5px 2px;
+            }
+        }
+        
+        @media (min-width: 1025px) and (max-width: 1200px) {
+            .tab {
+                font-size: 0.7rem;
+                padding: 6px 3px;
+            }
+        }
+        
+        @media (min-width: 1201px) {
+            .tab {
+                font-size: 0.75rem;
+                padding: 8px 4px;
+            }
+            
+            .grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .grid-2 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .grid-3 {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .grid-4 {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        
+        @media (min-width: 1401px) {
+            .tab {
+                font-size: 0.8rem;
+                padding: 10px 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐑 حاسبة جدوى مشروع تربية الأغنام - مصر</h1>
+        
+        <!-- Quick Summary Dashboard -->
+        <div id="quickSummary" style="background: #2c3e50; color: white; padding: 8px; border-radius: 6px; margin-bottom: 10px; display: none;">
+            <div class="quick-stats">
+                <div class="stat-box" style="background: #27ae60;">
+                    <div class="value" id="quickProfit">0</div>
+                    <div class="label">صافي الربح</div>
+                </div>
+                <div class="stat-box" style="background: #e74c3c;">
+                    <div class="value" id="quickInvestment">0</div>
+                    <div class="label">الاستثمار</div>
+                </div>
+                <div class="stat-box" style="background: #f39c12;">
+                    <div class="value" id="quickROI">0%</div>
+                    <div class="label">العائد</div>
+                </div>
+                <div class="stat-box" style="background: #9b59b6;">
+                    <div class="value" id="quickBreakeven">0</div>
+                    <div class="label">التعادل/شهر</div>
+                </div>
+                <div class="stat-box" style="background: #34495e;">
+                    <div class="value" id="quickRevenue">0</div>
+                    <div class="label">الإيرادات</div>
+                </div>
+                <div class="stat-box" style="background: #16a085;">
+                    <div class="value" id="quickMargin">0%</div>
+                    <div class="label">هامش الربح</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('market')">بحث السوق</button>
+            <button class="tab" onclick="showTab('livestock')">بيانات الأغنام</button>
+            <button class="tab" onclick="showTab('infrastructure')">البنية التحتية</button>
+            <button class="tab" onclick="showTab('operations')">التشغيل</button>
+            <button class="tab" onclick="showTab('breeding')">برنامج التربية</button>
+            <button class="tab" onclick="showTab('risks')">المخاطر والضرائب</button>
+            <button class="tab" onclick="showTab('seasonal')">التحليل الموسمي</button>
+            <button class="tab" onclick="showTab('financial')">التحليل المالي</button>
+        </div>
+        
+        <!-- بحث السوق -->
+        <div id="market" class="tab-content active">
+            <div class="info-box">
+                📊 ادخل معلومات السوق المحلية لمنطقتك للحصول على تحليل دقيق
+            </div>
+            
+            <div class="grid">
+                <div class="section">
+                    <h3>أسعار البيع</h3>
+                    <div class="input-group">
+                        <label>سعر خروف الأضحية (جنيه)</label>
+                        <input type="number" id="udheyaPrice" value="8000">
+                        <span class="small-text">متوسط السعر في موسم الأضحى</span>
+                    </div>
+                    <div class="input-group">
+                        <label>سعر كيلو اللحم (جنيه)</label>
+                        <input type="number" id="meatPrice" value="250">
+                    </div>
+                    <div class="input-group">
+                        <label>سعر الخروف الحي للبيع (جنيه)</label>
+                        <input type="number" id="liveAnimalPrice" value="6000">
+                        <span class="small-text">للمناسبات والأفراح</span>
+                    </div>
+                    <div class="input-group">
+                        <label>سعر وجبة الكاترينج/شخص (جنيه)</label>
+                        <input type="number" id="cateringPrice" value="150">
+                    </div>
+                    <div class="input-group">
+                        <label>سعر إيجار الخروف للمناسبات (جنيه/يوم)</label>
+                        <input type="number" id="eventRentalPrice" value="500">
+                    </div>
+                    <div class="input-group">
+                        <label>سعر بيع السماد العضوي/طن</label>
+                        <input type="number" id="manurePrice" value="300">
+                    </div>
+                    <div class="input-group">
+                        <label>سعر بيع الجلد/قطعة</label>
+                        <input type="number" id="hidePrice" value="150">
+                    </div>
+                    <div class="input-group">
+                        <label>سعر التصدير للخليج/خروف</label>
+                        <input type="number" id="exportPrice" value="12000">
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>معلومات السوق</h3>
+                    <div class="input-group">
+                        <label>نوع السوق المستهدف</label>
+                        <select id="marketType">
+                            <option value="local">محلي</option>
+                            <option value="regional">إقليمي</option>
+                            <option value="online">أونلاين</option>
+                            <option value="mixed">مختلط</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>متوسط سعر المنافسين (خروف أضحية)</label>
+                        <input type="number" id="competitorPrice" value="7500">
+                    </div>
+                    <div class="input-group">
+                        <label>عدد المنافسين في المنطقة</label>
+                        <input type="number" id="competitors" value="5">
+                    </div>
+                    <div class="input-group">
+                        <label>نسبة العملاء النقدي (%)</label>
+                        <input type="number" id="cashCustomers" value="60">
+                    </div>
+                    <div class="input-group">
+                        <label>نسبة العملاء الآجل (%)</label>
+                        <input type="number" id="creditCustomers" value="40" readonly>
+                    </div>
+                    <div class="input-group">
+                        <label>متوسط فترة التحصيل (يوم)</label>
+                        <input type="number" id="collectionPeriod" value="30">
+                    </div>
+                    <div class="input-group">
+                        <label>نسبة اللحوم الممتازة (%)</label>
+                        <input type="number" id="premiumMeat" value="30">
+                    </div>
+                    <div class="input-group">
+                        <label>نسبة اللحوم الجيدة (%)</label>
+                        <input type="number" id="goodMeat" value="50">
+                    </div>
+                    <div class="input-group">
+                        <label>نسبة اللحوم العادية (%)</label>
+                        <input type="number" id="regularMeat" value="20">
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>تحليل الطلب</h3>
+                    <div class="input-group">
+                        <label>عدد العملاء المتوقع (أضاحي)</label>
+                        <input type="number" id="udheyaCustomers" value="100">
+                    </div>
+                    <div class="input-group">
+                        <label>كمية اللحم المطلوبة شهرياً (كيلو)</label>
+                        <input type="number" id="meatDemand" value="500">
+                    </div>
+                    <div class="input-group">
+                        <label>عدد الخراف الحية للبيع شهرياً</label>
+                        <input type="number" id="liveAnimalMonthly" value="10">
+                    </div>
+                    <div class="input-group">
+                        <label>عدد مناسبات الكاترينج شهرياً</label>
+                        <input type="number" id="cateringEvents" value="4">
+                    </div>
+                    <div class="input-group">
+                        <label>متوسط عدد الأشخاص/مناسبة كاترينج</label>
+                        <input type="number" id="cateringPeople" value="50">
+                    </div>
+                    <div class="input-group">
+                        <label>عدد إيجارات المناسبات شهرياً</label>
+                        <input type="number" id="eventRentals" value="3">
+                    </div>
+                    <div class="input-group">
+                        <label>عدد الخراف للتصدير شهرياً</label>
+                        <input type="number" id="exportMonthly" value="5">
+                    </div>
+                    <div class="input-group">
+                        <label>إنتاج السماد العضوي (طن/سنة)</label>
+                        <input type="number" id="manureProduction" value="20">
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>معدات الكاترينج والمناسبات</h3>
+                    <div class="input-group">
+                        <label>شوايات ومعدات طبخ</label>
+                        <input type="number" id="cateringCooking" value="30000">
+                    </div>
+                    <div class="input-group">
+                        <label>خيام وكراسي وطاولات</label>
+                        <input type="number" id="cateringFurniture" value="40000">
+                    </div>
+                    <div class="input-group">
+                        <label>أطباق وأدوات تقديم</label>
+                        <input type="number" id="cateringServing" value="15000">
+                    </div>
+                    <div class="input-group">
+                        <label>مولد كهرباء متنقل</label>
+                        <input type="number" id="generator" value="25000">
+                    </div>
+                    <div class="input-group">
+                        <label>تصوير احترافي للمنتجات</label>
+                        <input type="number" id="photography" value="5000">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- بيانات الأغنام -->
+        <div id="livestock" class="tab-content">
+            <div class="grid">
+                <div class="section">
+                    <h3>شراء الأغنام</h3>
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>عدد الأغنام المبدئي</label>
+                            <input type="number" id="initialSheep" value="50">
+                        </div>
+                        <div class="input-group">
+                            <label>سعر الخروف (جنيه)</label>
+                            <input type="number" id="sheepCost" value="3500">
+                        </div>
+                        <div class="input-group">
+                            <label>عدد النعاج</label>
+                            <input type="number" id="ewes" value="30">
+                        </div>
+                        <div class="input-group">
+                            <label>عدد الكباش</label>
+                            <input type="number" id="rams" value="3">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>معدلات الإنتاج</h3>
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>معدل الولادة %</label>
+                            <input type="number" id="birthRate" value="150">
+                            <span class="small-text">150% = 1.5 مولود/نعجة</span>
+                        </div>
+                        <div class="input-group">
+                            <label>معدل النفوق %</label>
+                            <input type="number" id="mortalityRate" value="5">
+                        </div>
+                        <div class="input-group">
+                            <label>وقت التسويق (شهر)</label>
+                            <input type="number" id="timeToMarket" value="6">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>التغذية والمياه</h3>
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>علف كجم/يوم</label>
+                            <input type="number" id="feedPerDay" value="1.5" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>سعر طن العلف</label>
+                            <input type="number" id="feedPriceTon" value="12000">
+                        </div>
+                        <div class="input-group">
+                            <label>معدل تحويل</label>
+                            <input type="number" id="feedConversion" value="5" step="0.1">
+                            <span class="small-text">كجم علف/كجم زيادة</span>
+                        </div>
+                        <div class="input-group">
+                            <label>مياه لتر/يوم</label>
+                            <input type="number" id="waterPerDay" value="8">
+                            <span class="small-text">يزيد لـ12 في الصيف</span>
+                        </div>
+                        <div class="input-group">
+                            <label>سعر م³ مياه</label>
+                            <input type="number" id="waterPrice" value="3.5" step="0.1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- البنية التحتية -->
+        <div id="infrastructure" class="tab-content">
+            <div class="grid">
+                <div class="section">
+                    <h3>الأرض والمباني</h3>
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>مساحة (م²)</label>
+                            <input type="number" id="landArea" value="2000">
+                        </div>
+                        <div class="input-group">
+                            <label>إيجار سنوي</label>
+                            <input type="number" id="landRent" value="60000">
+                            <span class="small-text">0 إذا تملك</span>
+                        </div>
+                        <div class="input-group">
+                            <label>بناء الحظائر</label>
+                            <input type="number" id="shelterCost" value="150000">
+                        </div>
+                        <div class="input-group">
+                            <label>السياج</label>
+                            <input type="number" id="fencingCost" value="40000">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>المعدات والتجهيزات</h3>
+                    <div class="grid-3">
+                        <div class="input-group">
+                            <label>نظام المياه</label>
+                            <input type="number" id="waterSystem" value="25000">
+                        </div>
+                        <div class="input-group">
+                            <label>تدوير المياه</label>
+                            <input type="number" id="waterRecycling" value="40000">
+                            <span class="small-text">يوفر 30%</span>
+                        </div>
+                        <div class="input-group">
+                            <label>معدات التغذية</label>
+                            <input type="number" id="feedingEquipment" value="15000">
+                        </div>
+                        <div class="input-group">
+                            <label>مخزن العلف</label>
+                            <input type="number" id="feedStorage" value="30000">
+                        </div>
+                        <div class="input-group">
+                            <label>ثلاجات حفظ</label>
+                            <input type="number" id="refrigerators" value="80000">
+                        </div>
+                        <div class="input-group">
+                            <label>فريزرات</label>
+                            <input type="number" id="freezers" value="60000">
+                        </div>
+                        <div class="input-group">
+                            <label>معدات تغليف</label>
+                            <input type="number" id="packagingEquipment" value="35000">
+                        </div>
+                        <div class="input-group">
+                            <label>نظام بيوجاز</label>
+                            <input type="number" id="biogasSystem" value="75000">
+                            <span class="small-text">اختياري</span>
+                        </div>
+                        <div class="input-group">
+                            <label>معدات أخرى</label>
+                            <input type="number" id="otherEquipment" value="20000">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>المركبات والنقل</h3>
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>سيارة نقل عادية</label>
+                            <input type="number" id="vehicle" value="0">
+                            <span class="small-text">0 إذا نقل مؤجر</span>
+                        </div>
+                        <div class="input-group">
+                            <label>سيارة مبردة</label>
+                            <input type="number" id="refrigeratedVehicle" value="350000">
+                        </div>
+                        <div class="input-group">
+                            <label>نقل شهري</label>
+                            <input type="number" id="transportMonthly" value="5000">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>البيع الأونلاين والتقنية</h3>
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>موقع إلكتروني</label>
+                            <input type="number" id="website" value="25000">
+                        </div>
+                        <div class="input-group">
+                            <label>تطبيق موبايل</label>
+                            <input type="number" id="mobileApp" value="50000">
+                        </div>
+                        <div class="input-group">
+                            <label>بوابة دفع</label>
+                            <input type="number" id="paymentGateway" value="10000">
+                        </div>
+                        <div class="input-group">
+                            <label>نظام المخزون</label>
+                            <input type="number" id="inventorySystem" value="15000">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- التشغيل -->
+        <div id="operations" class="tab-content">
+            <div class="grid">
+                <div class="section">
+                    <h3>العمالة</h3>
+                    <div class="input-group">
+                        <label>عدد العمال</label>
+                        <input type="number" id="workers" value="2">
+                    </div>
+                    <div class="input-group">
+                        <label>راتب العامل الشهري</label>
+                        <input type="number" id="workerSalary" value="3000">
+                    </div>
+                    <div class="input-group">
+                        <label>مشرف/مدير (راتب شهري)</label>
+                        <input type="number" id="managerSalary" value="0">
+                        <span class="small-text">0 إذا كنت ستدير بنفسك</span>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>الخدمات البيطرية</h3>
+                    <div class="input-group">
+                        <label>تكلفة التحصينات السنوية/رأس</label>
+                        <input type="number" id="vaccinesPerHead" value="150">
+                    </div>
+                    <div class="input-group">
+                        <label>ميزانية طوارئ بيطرية شهرية</label>
+                        <input type="number" id="vetEmergency" value="2500">
+                    </div>
+                    <div class="input-group">
+                        <label>فحص دوري شهري</label>
+                        <input type="number" id="vetCheckup" value="1500">
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>مصاريف أخرى</h3>
+                    <div class="input-group">
+                        <label>الكهرباء والماء شهرياً</label>
+                        <input type="number" id="utilities" value="2000">
+                    </div>
+                    <div class="input-group">
+                        <label>التسويق والإعلان شهرياً</label>
+                        <input type="number" id="marketing" value="3000">
+                    </div>
+                    <div class="input-group">
+                        <label>إعلانات فيسبوك وإنستجرام</label>
+                        <input type="number" id="digitalMarketing" value="5000">
+                    </div>
+                    <div class="input-group">
+                        <label>التأمين السنوي</label>
+                        <input type="number" id="insurance" value="12000">
+                    </div>
+                    <div class="input-group">
+                        <label>رخص وتصاريح سنوية</label>
+                        <input type="number" id="licenses" value="8000">
+                    </div>
+                    <div class="input-group">
+                        <label>شهادة الذبح الحلال</label>
+                        <input type="number" id="halalCertificate" value="15000">
+                    </div>
+                    <div class="input-group">
+                        <label>شهادات الجودة والصحة</label>
+                        <input type="number" id="qualityCertificates" value="10000">
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>تكاليف الذبح والتجهيز</h3>
+                    <div class="input-group">
+                        <label>رسوم المجزر/خروف</label>
+                        <input type="number" id="slaughterFee" value="100">
+                    </div>
+                    <div class="input-group">
+                        <label>تكلفة التقطيع والتغليف/خروف</label>
+                        <input type="number" id="processingFee" value="150">
+                    </div>
+                    <div class="input-group">
+                        <label>أكياس تفريغ وتعبئة شهرياً</label>
+                        <input type="number" id="packagingMonthly" value="2000">
+                    </div>
+                    <div class="input-group">
+                        <label>عمالة مؤقتة للكاترينج/مناسبة</label>
+                        <input type="number" id="cateringStaffPerEvent" value="1500">
+                    </div>
+                    <div class="input-group">
+                        <label>تكلفة التوصيل شهرياً</label>
+                        <input type="number" id="deliveryCost" value="3000">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- برنامج التربية -->
+        <div id="breeding" class="tab-content">
+            <div class="info-box">
+                🐏 حدد برنامج التربية والتناسل لتحسين الإنتاجية
+            </div>
+            
+            <div class="grid">
+                <div class="section">
+                    <h3>معدلات التناسل</h3>
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>معدل الخصوبة %</label>
+                            <input type="number" id="fertilityRate" value="85">
+                        </div>
+                        <div class="input-group">
+                            <label>ولادات/سنة</label>
+                            <input type="number" id="birthsPerYear" value="1.5" step="0.1">
+                            <span class="small-text">3 ولادات/سنتين</span>
+                        </div>
+                        <div class="input-group">
+                            <label>مواليد/ولادة</label>
+                            <input type="number" id="lambsPerBirth" value="1.3" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>نسبة توائم %</label>
+                            <input type="number" id="twinRate" value="30">
+                        </div>
+                        <div class="input-group">
+                            <label>عمر أول ولادة</label>
+                            <input type="number" id="firstBirthAge" value="18">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>برنامج التلقيح</h3>
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>نوع التلقيح</label>
+                            <select id="inseminationType">
+                                <option value="natural">طبيعي</option>
+                                <option value="artificial">صناعي</option>
+                                <option value="mixed">مختلط</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>تكلفة صناعي/نعجة</label>
+                            <input type="number" id="artificialInseminationCost" value="200">
+                        </div>
+                        <div class="input-group">
+                            <label>نجاح التلقيح %</label>
+                            <input type="number" id="inseminationSuccess" value="75">
+                        </div>
+                        <div class="input-group">
+                            <label>كباش مطلوبة</label>
+                            <input type="number" id="ramsNeeded" value="3" readonly>
+                            <span class="small-text">كبش/25 نعجة</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>جدول التربية</h3>
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>موسم التلقيح</label>
+                            <select id="mainBreedingSeason">
+                                <option value="spring">الربيع (مارس-مايو)</option>
+                                <option value="fall">الخريف (سبتمبر-نوفمبر)</option>
+                                <option value="both">موسمين</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>فترة الحمل</label>
+                            <input type="number" id="gestationPeriod" value="150" readonly>
+                        </div>
+                        <div class="input-group">
+                            <label>فترة الرضاعة</label>
+                            <input type="number" id="lactationPeriod" value="90">
+                        </div>
+                        <div class="input-group">
+                            <label>عمر الفطام</label>
+                            <input type="number" id="weaningAge" value="90">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>تحسين السلالة</h3>
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>برنامج تحسين</label>
+                            <select id="geneticImprovement">
+                                <option value="none">لا يوجد</option>
+                                <option value="local">محلي</option>
+                                <option value="import">استيراد</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>تكلفة كبش محسن</label>
+                            <input type="number" id="improvedRamCost" value="25000">
+                        </div>
+                        <div class="input-group">
+                            <label>عدد كباش محسنة</label>
+                            <input type="number" id="improvedRamsCount" value="1">
+                        </div>
+                        <div class="input-group">
+                            <label>زيادة إنتاجية %</label>
+                            <input type="number" id="productivityIncrease" value="20">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- المخاطر والضرائب -->
+        <div id="risks" class="tab-content">
+            <div class="info-box">
+                ⚠️ تقييم المخاطر والالتزامات المالية للمشروع
+            </div>
+            
+            <div class="grid">
+                <div class="section">
+                    <h3>إدارة المخاطر</h3>
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>احتياطي صحي %</label>
+                            <input type="number" id="healthEmergency" value="10">
+                            <span class="small-text">من قيمة القطيع</span>
+                        </div>
+                        <div class="input-group">
+                            <label>نفوق حرارة %</label>
+                            <input type="number" id="heatWaveMortality" value="3">
+                        </div>
+                        <div class="input-group">
+                            <label>تقلب أعلاف %</label>
+                            <input type="number" id="feedPriceVolatility" value="15">
+                        </div>
+                        <div class="input-group">
+                            <label>توقف توريد يوم</label>
+                            <input type="number" id="supplyInterruption" value="10">
+                        </div>
+                        <div class="input-group">
+                            <label>نظام تبريد</label>
+                            <input type="number" id="coolingSystems" value="30000">
+                        </div>
+                        <div class="input-group">
+                            <label>تأمين كوارث</label>
+                            <input type="number" id="naturalDisasterInsurance" value="15000">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>الضرائب والرسوم</h3>
+                    <div class="grid-3">
+                        <div class="input-group">
+                            <label>ضريبة دخل %</label>
+                            <input type="number" id="incomeTax" value="22.5">
+                        </div>
+                        <div class="input-group">
+                            <label>قيمة مضافة %</label>
+                            <input type="number" id="vat" value="14">
+                        </div>
+                        <div class="input-group">
+                            <label>رسوم بلدية</label>
+                            <input type="number" id="municipalFees" value="5000">
+                        </div>
+                        <div class="input-group">
+                            <label>غرفة تجارة</label>
+                            <input type="number" id="chamberFees" value="2000">
+                        </div>
+                        <div class="input-group">
+                            <label>اتحاد منتجين</label>
+                            <input type="number" id="producerUnionFees" value="3000">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>الزكاة</h3>
+                    <div class="grid-3">
+                        <div class="input-group">
+                            <label>نصاب الغنم</label>
+                            <input type="number" id="zakatNisab" value="40" readonly>
+                        </div>
+                        <div class="input-group">
+                            <label>زكاة مستحقة</label>
+                            <input type="number" id="zakatDue" value="0" readonly>
+                            <span class="small-text">تحسب تلقائياً</span>
+                        </div>
+                        <div class="input-group">
+                            <label>قيمة بالجنيه</label>
+                            <input type="number" id="zakatValue" value="0" readonly>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>التصدير والجودة</h3>
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>شهادات تصدير</label>
+                            <input type="number" id="exportCertificates" value="25000">
+                        </div>
+                        <div class="input-group">
+                            <label>شحن/خروف</label>
+                            <input type="number" id="shippingPerHead" value="500">
+                        </div>
+                        <div class="input-group">
+                            <label>ISO 22000</label>
+                            <input type="number" id="isoCertificate" value="50000">
+                        </div>
+                        <div class="input-group">
+                            <label>منصات أونلاين</label>
+                            <input type="number" id="onlinePlatformFees" value="24000">
+                            <span class="small-text">أمازون، جوميا</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- التحليل الموسمي -->
+        <div id="seasonal" class="tab-content">
+            <div class="info-box">
+                📅 حدد توزيع المبيعات المتوقع على مدار السنة لحساب احتياجات السيولة
+            </div>
+            
+            <div class="grid-3">
+                <div class="section-compact">
+                    <h3>توزيع الأضاحي</h3>
+                    <div class="grid-2" style="gap: 4px;">
+                        <div class="compact-input">
+                            <label>ذو الحجة %</label>
+                            <input type="number" id="eidSales" value="85">
+                            <span class="small-text">النسبة الأكبر</span>
+                        </div>
+                        <div class="compact-input">
+                            <label>باقي السنة %</label>
+                            <input type="number" id="nonEidSales" value="15" readonly>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section-compact">
+                    <h3>المواسم</h3>
+                    <div class="compact-grid">
+                        <div class="compact-input">
+                            <label>رمضان+</label>
+                            <input type="number" id="ramadanIncrease" value="30">
+                        </div>
+                        <div class="compact-input">
+                            <label>صيف+</label>
+                            <input type="number" id="summerCatering" value="40">
+                            <span class="small-text" style="font-size: 0.6rem;">موسم الأفراح</span>
+                        </div>
+                        <div class="compact-input">
+                            <label>شتاء-</label>
+                            <input type="number" id="winterDecrease" value="20">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section-compact">
+                    <h3>السيولة</h3>
+                    <div style="font-size: 0.8rem; line-height: 1.4;">
+                        <div style="margin-bottom: 5px;">
+                            <strong>أعلى احتياج:</strong> شهر <span id="highestCashNeed">0</span>
+                        </div>
+                        <div style="margin-bottom: 5px;">
+                            <strong>أقل إيراد:</strong> <span id="lowestRevenue">0</span>
+                        </div>
+                        <div style="margin-bottom: 5px;">
+                            <strong>أعلى إيراد:</strong> <span id="highestRevenue">0</span>
+                        </div>
+                        <div style="background: #e8f4f8; padding: 5px; border-radius: 3px; margin-top: 6px;">
+                            <strong>احتياطي مطلوب:</strong> <span id="cashReserve" style="color: #2c3e50;">0</span> جنيه
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- التحليل المالي -->
+        <div id="financial" class="tab-content">
+            <div class="summary-section">
+                <h2>📊 الملخص المالي الشامل</h2>
+                
+                <div class="metrics-grid">
+                    <div class="metric">
+                        <div class="metric-label">الاستثمار المطلوب</div>
+                        <div class="metric-value"><span id="totalInvestment">0</span> جنيه</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">إيرادات السنة 1</div>
+                        <div class="metric-value"><span id="yearOneRevenue">0</span> جنيه</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">تكاليف السنة 1</div>
+                        <div class="metric-value"><span id="yearOneCosts">0</span> جنيه</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">صافي الربح</div>
+                        <div class="metric-value"><span id="yearOneProfit">0</span> جنيه</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">نقطة التعادل</div>
+                        <div class="metric-value"><span id="breakEven">0</span> شهر</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">العائد ROI</div>
+                        <div class="metric-value"><span id="roi">0</span>%</div>
+                    </div>
+                </div>
+                
+                <div id="decisionBox" class="decision-box">
+                    جاري الحساب...
+                </div>
+                
+                <div style="margin-top: 10px; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 6px;">
+                    <h3 style="color: white; margin-bottom: 6px; font-size: 0.9rem;">تفاصيل التحليل:</h3>
+                    
+                    <div class="grid-3" style="color: white; font-size: 0.75rem; line-height: 1.3; gap: 10px;">
+                        <div style="background: rgba(0,0,0,0.2); padding: 6px; border-radius: 4px;">
+                            <strong style="display: block; margin-bottom: 4px; color: #ffd700;">💰 الاستثمار</strong>
+                            <div>البنية: <span id="infraTotal">0</span></div>
+                            <div>القطيع: <span id="flockTotal">0</span></div>
+                            <div>رأس مال: <span id="workingCapital">0</span></div>
+                            <div>أونلاين: <span id="onlineTotal">0</span></div>
+                        </div>
+                        
+                        <div style="background: rgba(0,0,0,0.2); padding: 6px; border-radius: 4px;">
+                            <strong style="display: block; margin-bottom: 4px; color: #ffd700;">📊 شهرياً</strong>
+                            <div>تشغيل: <span id="monthlyOperating">0</span></div>
+                            <div>ذبح: <span id="processingCosts">0</span></div>
+                            <div>تسويق: <span id="digitalMarketingCost">0</span></div>
+                            <div>مياه: <span id="waterCostDisplay">0</span></div>
+                        </div>
+                        
+                        <div style="background: rgba(0,0,0,0.2); padding: 6px; border-radius: 4px;">
+                            <strong style="display: block; margin-bottom: 4px; color: #ffd700;">💵 إيرادات</strong>
+                            <div>أضاحي: <span id="udheyaRevenue">0</span></div>
+                            <div>لحوم: <span id="meatRevenue">0</span></div>
+                            <div>حية: <span id="liveAnimalRevenue">0</span></div>
+                            <div>كاترينج: <span id="cateringRevenue">0</span></div>
+                        </div>
+                        
+                        <div style="background: rgba(0,0,0,0.2); padding: 6px; border-radius: 4px;">
+                            <strong style="display: block; margin-bottom: 4px; color: #ffd700;">➕ إضافية</strong>
+                            <div>تأجير: <span id="eventRentalRevenue">0</span></div>
+                            <div>تصدير: <span id="exportRevenue">0</span></div>
+                            <div>سماد: <span id="manureRevenue">0</span></div>
+                            <div>جلود: <span id="hideRevenue">0</span></div>
+                        </div>
+                        
+                        <div style="background: rgba(0,0,0,0.2); padding: 6px; border-radius: 4px;">
+                            <strong style="display: block; margin-bottom: 4px; color: #ffd700;">📈 مؤشرات</strong>
+                            <div>هامش: <span id="profitMargin">0</span>%</div>
+                            <div>استرداد: <span id="paybackPeriod">0</span>م</div>
+                            <div>سيولة: <span id="requiredCashReserve">0</span></div>
+                        </div>
+                        
+                        <div style="background: rgba(0,0,0,0.2); padding: 6px; border-radius: 4px;">
+                            <strong style="display: block; margin-bottom: 4px; color: #ffd700;">⚖️ التزامات</strong>
+                            <div>زكاة: <span id="zakatDisplay">0</span></div>
+                            <div>ضريبة: <span id="taxDisplay">0</span></div>
+                            <div>مخاطر: <span id="riskReserveDisplay">0</span></div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Show tab function
+        function showTab(tabName) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('.tab');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+            
+            // Recalculate when showing financial, seasonal, breeding or risks tab
+            if (tabName === 'financial' || tabName === 'seasonal' || tabName === 'breeding' || tabName === 'risks') {
+                calculateAll();
+            }
+        }
+        
+        // Get all inputs
+        const inputs = document.querySelectorAll('input[type="number"]');
+        inputs.forEach(input => {
+            input.addEventListener('input', () => {
+                const activeTab = document.querySelector('.tab-content.active');
+                if (activeTab && (activeTab.id === 'financial' || activeTab.id === 'seasonal' || 
+                                 activeTab.id === 'breeding' || activeTab.id === 'risks')) {
+                    calculateAll();
+                }
+            });
+        });
+        
+        function calculateAll() {
+            // Market data
+            const udheyaPrice = parseFloat(document.getElementById('udheyaPrice').value) || 0;
+            const meatPrice = parseFloat(document.getElementById('meatPrice').value) || 0;
+            const liveAnimalPrice = parseFloat(document.getElementById('liveAnimalPrice').value) || 0;
+            const cateringPrice = parseFloat(document.getElementById('cateringPrice').value) || 0;
+            const eventRentalPrice = parseFloat(document.getElementById('eventRentalPrice').value) || 0;
+            const manurePrice = parseFloat(document.getElementById('manurePrice').value) || 0;
+            const hidePrice = parseFloat(document.getElementById('hidePrice').value) || 0;
+            const exportPrice = parseFloat(document.getElementById('exportPrice').value) || 0;
+            const udheyaCustomers = parseFloat(document.getElementById('udheyaCustomers').value) || 0;
+            const meatDemand = parseFloat(document.getElementById('meatDemand').value) || 0;
+            const liveAnimalMonthly = parseFloat(document.getElementById('liveAnimalMonthly').value) || 0;
+            const cateringEvents = parseFloat(document.getElementById('cateringEvents').value) || 0;
+            const cateringPeople = parseFloat(document.getElementById('cateringPeople').value) || 0;
+            const eventRentals = parseFloat(document.getElementById('eventRentals').value) || 0;
+            const exportMonthly = parseFloat(document.getElementById('exportMonthly').value) || 0;
+            const manureProduction = parseFloat(document.getElementById('manureProduction').value) || 0;
+            
+            // Payment terms
+            const cashCustomers = parseFloat(document.getElementById('cashCustomers').value) || 0;
+            const collectionPeriod = parseFloat(document.getElementById('collectionPeriod').value) || 0;
+            
+            // Catering equipment
+            const cateringCooking = parseFloat(document.getElementById('cateringCooking').value) || 0;
+            const cateringFurniture = parseFloat(document.getElementById('cateringFurniture').value) || 0;
+            const cateringServing = parseFloat(document.getElementById('cateringServing').value) || 0;
+            const generator = parseFloat(document.getElementById('generator').value) || 0;
+            const photography = parseFloat(document.getElementById('photography').value) || 0;
+            
+            // Livestock data
+            const initialSheep = parseFloat(document.getElementById('initialSheep').value) || 0;
+            const sheepCost = parseFloat(document.getElementById('sheepCost').value) || 0;
+            const ewes = parseFloat(document.getElementById('ewes').value) || 0;
+            const birthRate = parseFloat(document.getElementById('birthRate').value) || 0;
+            const mortalityRate = parseFloat(document.getElementById('mortalityRate').value) || 0;
+            const feedPerDay = parseFloat(document.getElementById('feedPerDay').value) || 0;
+            const feedPriceTon = parseFloat(document.getElementById('feedPriceTon').value) || 0;
+            const waterPerDay = parseFloat(document.getElementById('waterPerDay').value) || 0;
+            const waterPrice = parseFloat(document.getElementById('waterPrice').value) || 0;
+            
+            // Breeding program
+            const fertilityRate = parseFloat(document.getElementById('fertilityRate').value) || 0;
+            const birthsPerYear = parseFloat(document.getElementById('birthsPerYear').value) || 0;
+            const lambsPerBirth = parseFloat(document.getElementById('lambsPerBirth').value) || 0;
+            const artificialInseminationCost = parseFloat(document.getElementById('artificialInseminationCost').value) || 0;
+            const improvedRamCost = parseFloat(document.getElementById('improvedRamCost').value) || 0;
+            const improvedRamsCount = parseFloat(document.getElementById('improvedRamsCount').value) || 0;
+            
+            // Infrastructure
+            const landRent = parseFloat(document.getElementById('landRent').value) || 0;
+            const shelterCost = parseFloat(document.getElementById('shelterCost').value) || 0;
+            const fencingCost = parseFloat(document.getElementById('fencingCost').value) || 0;
+            const waterSystem = parseFloat(document.getElementById('waterSystem').value) || 0;
+            const waterRecycling = parseFloat(document.getElementById('waterRecycling').value) || 0;
+            const feedingEquipment = parseFloat(document.getElementById('feedingEquipment').value) || 0;
+            const feedStorage = parseFloat(document.getElementById('feedStorage').value) || 0;
+            const refrigerators = parseFloat(document.getElementById('refrigerators').value) || 0;
+            const freezers = parseFloat(document.getElementById('freezers').value) || 0;
+            const packagingEquipment = parseFloat(document.getElementById('packagingEquipment').value) || 0;
+            const biogasSystem = parseFloat(document.getElementById('biogasSystem').value) || 0;
+            const otherEquipment = parseFloat(document.getElementById('otherEquipment').value) || 0;
+            const vehicle = parseFloat(document.getElementById('vehicle').value) || 0;
+            const refrigeratedVehicle = parseFloat(document.getElementById('refrigeratedVehicle').value) || 0;
+            const transportMonthly = parseFloat(document.getElementById('transportMonthly').value) || 0;
+            
+            // Risk management
+            const coolingSystems = parseFloat(document.getElementById('coolingSystems').value) || 0;
+            const naturalDisasterInsurance = parseFloat(document.getElementById('naturalDisasterInsurance').value) || 0;
+            const healthEmergency = parseFloat(document.getElementById('healthEmergency').value) || 0;
+            const heatWaveMortality = parseFloat(document.getElementById('heatWaveMortality').value) || 0;
+            const feedPriceVolatility = parseFloat(document.getElementById('feedPriceVolatility').value) || 0;
+            
+            // Taxes and fees
+            const incomeTax = parseFloat(document.getElementById('incomeTax').value) || 0;
+            const vat = parseFloat(document.getElementById('vat').value) || 0;
+            const municipalFees = parseFloat(document.getElementById('municipalFees').value) || 0;
+            const chamberFees = parseFloat(document.getElementById('chamberFees').value) || 0;
+            const producerUnionFees = parseFloat(document.getElementById('producerUnionFees').value) || 0;
+            
+            // Export and quality
+            const exportCertificates = parseFloat(document.getElementById('exportCertificates').value) || 0;
+            const shippingPerHead = parseFloat(document.getElementById('shippingPerHead').value) || 0;
+            const isoCertificate = parseFloat(document.getElementById('isoCertificate').value) || 0;
+            const onlinePlatformFees = parseFloat(document.getElementById('onlinePlatformFees').value) || 0;
+            
+            // Online setup
+            const website = parseFloat(document.getElementById('website').value) || 0;
+            const mobileApp = parseFloat(document.getElementById('mobileApp').value) || 0;
+            const paymentGateway = parseFloat(document.getElementById('paymentGateway').value) || 0;
+            const inventorySystem = parseFloat(document.getElementById('inventorySystem').value) || 0;
+            
+            // Operations
+            const workers = parseFloat(document.getElementById('workers').value) || 0;
+            const workerSalary = parseFloat(document.getElementById('workerSalary').value) || 0;
+            const managerSalary = parseFloat(document.getElementById('managerSalary').value) || 0;
+            const vaccinesPerHead = parseFloat(document.getElementById('vaccinesPerHead').value) || 0;
+            const vetEmergency = parseFloat(document.getElementById('vetEmergency').value) || 0;
+            const vetCheckup = parseFloat(document.getElementById('vetCheckup').value) || 0;
+            const utilities = parseFloat(document.getElementById('utilities').value) || 0;
+            const marketing = parseFloat(document.getElementById('marketing').value) || 0;
+            const digitalMarketing = parseFloat(document.getElementById('digitalMarketing').value) || 0;
+            const insurance = parseFloat(document.getElementById('insurance').value) || 0;
+            const licenses = parseFloat(document.getElementById('licenses').value) || 0;
+            const halalCertificate = parseFloat(document.getElementById('halalCertificate').value) || 0;
+            const qualityCertificates = parseFloat(document.getElementById('qualityCertificates').value) || 0;
+            
+            // Processing costs
+            const slaughterFee = parseFloat(document.getElementById('slaughterFee').value) || 0;
+            const processingFee = parseFloat(document.getElementById('processingFee').value) || 0;
+            const packagingMonthly = parseFloat(document.getElementById('packagingMonthly').value) || 0;
+            const cateringStaffPerEvent = parseFloat(document.getElementById('cateringStaffPerEvent').value) || 0;
+            const deliveryCost = parseFloat(document.getElementById('deliveryCost').value) || 0;
+            
+            // Calculations
+            // Update rams needed
+            document.getElementById('ramsNeeded').value = Math.ceil(ewes / 25);
+            
+            // Update credit customers
+            document.getElementById('creditCustomers').value = 100 - cashCustomers;
+            
+            // Total catering equipment
+            const cateringEquipmentTotal = cateringCooking + cateringFurniture + cateringServing + generator + photography;
+            
+            // Infrastructure total
+            const infrastructureTotal = shelterCost + fencingCost + waterSystem + waterRecycling +
+                                      feedingEquipment + feedStorage + refrigerators + freezers +
+                                      packagingEquipment + biogasSystem + otherEquipment + vehicle + 
+                                      refrigeratedVehicle + cateringEquipmentTotal + coolingSystems;
+            
+            // Online setup total
+            const onlineSetupTotal = website + mobileApp + paymentGateway + inventorySystem;
+            
+            // Breeding investment
+            const breedingInvestment = improvedRamCost * improvedRamsCount;
+            
+            // Export setup costs
+            const exportSetupCosts = exportCertificates + isoCertificate;
+            
+            // Flock cost
+            const flockCost = initialSheep * sheepCost + breedingInvestment;
+            
+            // Monthly operating costs
+            const laborCost = (workers * workerSalary) + managerSalary;
+            const feedCostMonthly = (initialSheep * feedPerDay * 30 * feedPriceTon) / 1000;
+            const waterCostMonthly = (initialSheep * waterPerDay * 30 * waterPrice) / 1000;
+            const vetCostMonthly = vetEmergency + vetCheckup;
+            const processingCostMonthly = (slaughterFee + processingFee) * (udheyaCustomers/12 + liveAnimalMonthly + exportMonthly);
+            const cateringStaffMonthly = cateringStaffPerEvent * cateringEvents;
+            const exportShippingMonthly = shippingPerHead * exportMonthly;
+            const breedingCostMonthly = (artificialInseminationCost * ewes * birthsPerYear) / 12;
+            const monthlyOperating = laborCost + feedCostMonthly + waterCostMonthly + vetCostMonthly + 
+                                   utilities + marketing + digitalMarketing + transportMonthly +
+                                   packagingMonthly + processingCostMonthly + cateringStaffMonthly + 
+                                   deliveryCost + exportShippingMonthly + breedingCostMonthly;
+            
+            // Annual operating costs
+            const annualFees = municipalFees + chamberFees + producerUnionFees + onlinePlatformFees;
+            const annualOperating = (monthlyOperating * 12) + (vaccinesPerHead * initialSheep) + 
+                                  insurance + licenses + landRent + halalCertificate + qualityCertificates +
+                                  naturalDisasterInsurance + annualFees;
+            
+            // Risk reserve
+            const healthReserve = flockCost * (healthEmergency / 100);
+            const feedPriceReserve = feedCostMonthly * 12 * (feedPriceVolatility / 100);
+            const totalRiskReserve = healthReserve + feedPriceReserve;
+            
+            // Working capital (4 months considering payment terms)
+            const workingCapitalMonths = 4 + (collectionPeriod / 30);
+            const workingCapital = monthlyOperating * workingCapitalMonths + totalRiskReserve;
+            
+            // Total investment
+            const totalInvestment = infrastructureTotal + flockCost + workingCapital + onlineSetupTotal + exportSetupCosts;
+            
+            // Revenue calculations with improved breeding
+            const effectiveFertility = fertilityRate / 100;
+            const expectedLambs = ewes * effectiveFertility * birthsPerYear * lambsPerBirth;
+            const effectiveMortality = (mortalityRate + heatWaveMortality) / 100;
+            const survivalRate = 1 - effectiveMortality;
+            const sellableSheep = expectedLambs * survivalRate;
+            
+            const udheyaRevenue = Math.min(udheyaCustomers, sellableSheep * 0.4) * udheyaPrice;
+            const meatRevenue = meatDemand * 12 * meatPrice;
+            const liveAnimalRevenue = liveAnimalMonthly * 12 * liveAnimalPrice;
+            const cateringRevenue = cateringEvents * 12 * cateringPeople * cateringPrice;
+            const eventRentalRevenue = eventRentals * 12 * eventRentalPrice;
+            const exportRevenue = exportMonthly * 12 * exportPrice;
+            const manureRevenue = manureProduction * manurePrice;
+            const hideRevenue = (sellableSheep * 0.8) * hidePrice;
+            
+            const totalRevenue = udheyaRevenue + meatRevenue + liveAnimalRevenue + cateringRevenue + 
+                               eventRentalRevenue + exportRevenue + manureRevenue + hideRevenue;
+            
+            // Calculate Zakat
+            const zakatDue = initialSheep >= 40 ? Math.floor(initialSheep / 40) : 0;
+            const zakatValue = zakatDue * sheepCost;
+            document.getElementById('zakatDue').value = zakatDue;
+            document.getElementById('zakatValue').value = zakatValue;
+            
+            // First year calculations
+            const firstYearCosts = totalInvestment + annualOperating + zakatValue;
+            const firstYearProfitBeforeTax = totalRevenue - firstYearCosts;
+            const taxAmount = firstYearProfitBeforeTax > 0 ? firstYearProfitBeforeTax * (incomeTax / 100) : 0;
+            const firstYearProfit = firstYearProfitBeforeTax - taxAmount;
+            
+            // Break-even
+            let breakEvenMonths = 0;
+            if (totalRevenue > annualOperating) {
+                const monthlyProfit = (totalRevenue - annualOperating) / 12;
+                breakEvenMonths = Math.ceil(totalInvestment / monthlyProfit);
+            } else {
+                breakEvenMonths = 999;
+            }
+            
+            // ROI and margins
+            const roi = totalInvestment > 0 ? ((firstYearProfit / totalInvestment) * 100).toFixed(1) : 0;
+            const profitMargin = totalRevenue > 0 ? ((firstYearProfit / totalRevenue) * 100).toFixed(1) : 0;
+            
+            // Seasonal analysis
+            const eidSalesPercent = parseFloat(document.getElementById('eidSales').value) || 85;
+            const monthlyAvgRevenue = totalRevenue / 12;
+            const eidMonthRevenue = (udheyaRevenue * eidSalesPercent / 100) + (monthlyAvgRevenue * 0.5);
+            const lowestMonthRevenue = monthlyAvgRevenue * 0.6;
+            const cashReserveNeeded = monthlyOperating * 6 + totalRiskReserve;
+            
+            // Update displays
+            document.getElementById('totalInvestment').textContent = totalInvestment.toLocaleString();
+            document.getElementById('yearOneRevenue').textContent = totalRevenue.toLocaleString();
+            document.getElementById('yearOneCosts').textContent = firstYearCosts.toLocaleString();
+            document.getElementById('yearOneProfit').textContent = firstYearProfit.toLocaleString();
+            document.getElementById('breakEven').textContent = breakEvenMonths === 999 ? 'لن يتعادل' : breakEvenMonths;
+            document.getElementById('roi').textContent = roi;
+            document.getElementById('infraTotal').textContent = infrastructureTotal.toLocaleString();
+            document.getElementById('flockTotal').textContent = flockCost.toLocaleString();
+            document.getElementById('workingCapital').textContent = workingCapital.toLocaleString();
+            document.getElementById('monthlyOperating').textContent = monthlyOperating.toLocaleString();
+            document.getElementById('onlineTotal').textContent = onlineSetupTotal.toLocaleString();
+            document.getElementById('processingCosts').textContent = processingCostMonthly.toLocaleString();
+            document.getElementById('digitalMarketingCost').textContent = digitalMarketing.toLocaleString();
+            document.getElementById('udheyaRevenue').textContent = udheyaRevenue.toLocaleString();
+            document.getElementById('meatRevenue').textContent = meatRevenue.toLocaleString();
+            document.getElementById('liveAnimalRevenue').textContent = liveAnimalRevenue.toLocaleString();
+            document.getElementById('cateringRevenue').textContent = cateringRevenue.toLocaleString();
+            document.getElementById('eventRentalRevenue').textContent = eventRentalRevenue.toLocaleString();
+            document.getElementById('profitMargin').textContent = profitMargin;
+            document.getElementById('paybackPeriod').textContent = breakEvenMonths === 999 ? 'غير محدد' : breakEvenMonths;
+            document.getElementById('requiredCashReserve').textContent = cashReserveNeeded.toLocaleString();
+            
+            // Seasonal displays
+            document.getElementById('nonEidSales').value = 100 - eidSalesPercent;
+            document.getElementById('highestCashNeed').textContent = 'ذو القعدة';
+            document.getElementById('lowestRevenue').textContent = lowestMonthRevenue.toLocaleString();
+            document.getElementById('highestRevenue').textContent = eidMonthRevenue.toLocaleString();
+            document.getElementById('cashReserve').textContent = cashReserveNeeded.toLocaleString();
+            
+            // Update additional revenue displays
+            document.getElementById('exportRevenue').textContent = exportRevenue.toLocaleString();
+            document.getElementById('manureRevenue').textContent = manureRevenue.toLocaleString();
+            document.getElementById('hideRevenue').textContent = hideRevenue.toLocaleString();
+            document.getElementById('zakatDisplay').textContent = zakatValue.toLocaleString();
+            document.getElementById('taxDisplay').textContent = taxAmount.toLocaleString();
+            document.getElementById('riskReserveDisplay').textContent = totalRiskReserve.toLocaleString();
+            document.getElementById('waterCostDisplay').textContent = waterCostMonthly.toLocaleString();
+            
+            // Decision
+            const decisionBox = document.getElementById('decisionBox');
+            if (firstYearProfit > 0 && breakEvenMonths <= 12) {
+                decisionBox.textContent = '✅ ممتاز - المشروع مربح من السنة الأولى!';
+                decisionBox.className = 'decision-box go';
+            } else if (firstYearProfit > 0 || (breakEvenMonths <= 18 && totalRevenue > annualOperating)) {
+                decisionBox.textContent = '⚠️ جيد - يحتاج مراجعة بعض التفاصيل';
+                decisionBox.className = 'decision-box maybe';
+            } else {
+                decisionBox.textContent = '❌ غير مجدي - المشروع يحتاج إعادة دراسة';
+                decisionBox.className = 'decision-box no-go';
+            }
+            
+            // Update quick summary
+            const quickSummary = document.getElementById('quickSummary');
+            if (quickSummary) {
+                quickSummary.style.display = 'block';
+                document.getElementById('quickProfit').textContent = firstYearProfit > 0 ? 
+                    '+' + (firstYearProfit / 1000).toFixed(0) + 'k' : 
+                    (firstYearProfit / 1000).toFixed(0) + 'k';
+                document.getElementById('quickInvestment').textContent = (totalInvestment / 1000).toFixed(0) + 'k';
+                document.getElementById('quickROI').textContent = roi + '%';
+                document.getElementById('quickBreakeven').textContent = breakEvenMonths === 999 ? '∞' : breakEvenMonths;
+                document.getElementById('quickRevenue').textContent = (totalRevenue / 1000).toFixed(0) + 'k';
+                document.getElementById('quickMargin').textContent = profitMargin + '%';
+            }
+        }
+        
+        // Initial calculation
+        calculateAll();
+        
+        // Update non-Eid sales when Eid sales changes
+        document.getElementById('eidSales').addEventListener('input', function() {
+            document.getElementById('nonEidSales').value = 100 - this.value;
+        });
+        
+        // Update credit customers when cash customers changes
+        document.getElementById('cashCustomers').addEventListener('input', function() {
+            document.getElementById('creditCustomers').value = 100 - this.value;
+        });
+        
+        // Update rams needed when ewes changes
+        document.getElementById('ewes').addEventListener('input', function() {
+            document.getElementById('ramsNeeded').value = Math.ceil(this.value / 25);
+        });
+    </script>
+</body>
+</html>
