@@ -6,6 +6,7 @@ let touchEndYCoord = 0;
 let isPullingToRefresh = false;
 let appCharts = {}; 
 let isInitialAppLoad = true;
+let isLoading = false;
 
 const appSectionOrder = ['market', 'livestock', 'infrastructure', 'operations', 'breeding', 'risks', 'seasonal', 'financial', 'multiyear', 'feedOptimizer', 'breedingCalendar', 'sensitivity', 'marketIntel', 'compliance', 'currencyConverter', 'operationalTools'];
 
@@ -13,9 +14,10 @@ let currentProjectData = {
     inputs: {},
     calculations: {},
     multiYearProjections: null,
-    currentFeedMixData: null,
+    currentFeedMixData: { mix: {}, totalCostPerTon: 0, protein: 0, energy: 0, fiber: 0 },
     breedingEventsData: null,
-    sensitivityAnalysisData: null
+    sensitivityAnalysisData: null,
+    complianceData: {}
 };
 
 function getVal(id, isCheckbox = false, isSelect = false) {
@@ -24,6 +26,7 @@ function getVal(id, isCheckbox = false, isSelect = false) {
     if (isCheckbox) return el.checked;
     if (isSelect) return el.value;
     const value = parseFloat(el.value);
+    if (el.hasAttribute('min') && parseFloat(el.getAttribute('min')) >= 0 && value < 0) { return 0; }
     return isNaN(value) ? 0 : value;
 }
 
@@ -71,9 +74,24 @@ function showAppNotification(message, type = 'success') {
     setTimeout(() => { notif.style.opacity = '0'; notif.style.transform = 'translateX(-50%) translateY(-40px)'; setTimeout(() => notif.remove(), 300); }, type === 'error' ? 4500 : 2800);
 }
 
+function toggleLoading(show) {
+    isLoading = show;
+    const fab = document.getElementById('calculateAllFab');
+    if (fab) {
+        if (show) {
+            fab.innerHTML = '<div class="fab-spinner"></div>'; 
+            fab.disabled = true;
+        } else {
+            fab.innerHTML = '<span>⚡</span>';
+            fab.disabled = false;
+        }
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     initializeAppControls();
     setupGlobalEventListeners();
+    initializeComplianceData(); 
     try { calculateAllFinancials(); } catch(e){ console.error("Initial calc error:",e); }
     setDefaultCurrencyValues();
     updateComplianceOverview();
@@ -113,6 +131,18 @@ function initializeAppControls() {
             }, element.type === 'number' ? 400 : 30);
         });
     });
+    const landTenureEl = document.getElementById('landTenureType');
+    if(landTenureEl) landTenureEl.addEventListener('change', toggleLandPurchaseInput);
+    toggleLandPurchaseInput();
+}
+
+function toggleLandPurchaseInput() {
+    const landTenure = getStrVal('landTenureType');
+    const purchasePriceField = document.getElementById('landPurchasePriceInput')?.closest('.input-field');
+    if(purchasePriceField) {
+        purchasePriceField.style.display = (landTenure === 'owned') ? 'block' : 'none';
+        if(landTenure !== 'owned') setVal('landPurchasePriceInput', 0);
+    }
 }
 
 function updateRamsNeededDisplay() {
@@ -268,8 +298,13 @@ function hideAllSheets() {
     const overlayEl = document.getElementById('pageOverlay'); if(overlayEl) overlayEl.classList.remove('active');
 }
 
-function calculateAllFinancials(fromFAB = false) {
+async function calculateAllFinancials(fromFAB = false) {
+    if (isLoading) return;
+    toggleLoading(true);
     if (fromFAB) { const fabEl = document.getElementById('calculateAllFab'); if (fabEl) { fabEl.classList.add('haptic-feedback'); setTimeout(() => fabEl.classList.remove('haptic-feedback'), 150); }}
+    
+    await new Promise(resolve => setTimeout(resolve, 50));
+
     currentProjectData.inputs = {
         udheyaPriceInput: getVal('udheyaPriceInput'), meatPriceInput: getVal('meatPriceInput'), liveAnimalPriceInput: getVal('liveAnimalPriceInput'),
         cateringPricePerPerson: getVal('cateringPricePerPerson'), eventRentalPricePerDay: getVal('eventRentalPricePerDay'),
@@ -288,12 +323,14 @@ function calculateAllFinancials(fromFAB = false) {
         improvedBreedPercentage: getVal('improvedBreedPercentage'), improvedRamsCountUsed: getVal('improvedRamsCountUsed'),
         improvedRamPurchaseCost: getVal('improvedRamPurchaseCost'), feedPerHeadDay: getVal('feedPerHeadDay'),
         feedPricePerTon: getVal('feedPricePerTon'), feedConversionRatio: getVal('feedConversionRatio'),
+        useOptimizedFeedCostToggle: getVal('useOptimizedFeedCostToggle', true), 
         concentrateFeedPortion: getVal('concentrateFeedPortion'), greenFeedPortion: getVal('greenFeedPortion'),
         roughageFeedPortion: getVal('roughageFeedPortion'), alfalfaPricePerKg: getVal('alfalfaPricePerKg'),
         barleyPricePerKg: getVal('barleyPricePerKg'), cornPricePerKg: getVal('cornPricePerKg'),
         soybeanPricePerKg: getVal('soybeanPricePerKg'), wheatBranPricePerKg: getVal('wheatBranPricePerKg'),
         concentratePricePerKg: getVal('concentratePricePerKg'), landTenureType: getStrVal('landTenureType'),
         landAreaSqM: getVal('landAreaSqM'), annualLandRent: getVal('annualLandRent'),
+        landPurchasePriceInput: getVal('landPurchasePriceInput'), 
         shelterConstructionCost: getVal('shelterConstructionCost'), fencingCost: getVal('fencingCost'),
         coveredBarnsCost: getVal('coveredBarnsCost'), openBarnsCost: getVal('openBarnsCost'),
         birthingRoomsCost: getVal('birthingRoomsCost'), vetClinicCost: getVal('vetClinicCost'),
@@ -302,6 +339,7 @@ function calculateAllFinancials(fromFAB = false) {
         freezersCost: getVal('freezersCost'), biogasSystemCost: getVal('biogasSystemCost'),
         waterRecyclingSystemCost: getVal('waterRecyclingSystemCost'), packagingEquipmentCost: getVal('packagingEquipmentCost'),
         barnCoolingSystemsCost: getVal('barnCoolingSystemsCost'), otherMiscellaneousEquipmentCost: getVal('otherMiscellaneousEquipmentCost'),
+        fixedAssetsLifespanYears: getVal('fixedAssetsLifespanYears') || 10,
         cateringGrillsCost: getVal('cateringGrillsCost'), cateringFurnitureCost: getVal('cateringFurnitureCost'),
         cateringServingWareCost: getVal('cateringServingWareCost'), portableGeneratorCost: getVal('portableGeneratorCost'),
         productPhotographyCost: getVal('productPhotographyCost'), standardVehicleCost: getVal('standardVehicleCost'),
@@ -317,10 +355,12 @@ function calculateAllFinancials(fromFAB = false) {
         qualityCertificatesAnnualCost: getVal('qualityCertificatesAnnualCost'), slaughterFeePerSheep: getVal('slaughterFeePerSheep'),
         processingFeePerSheep: getVal('processingFeePerSheep'), packagingMonthlySupplyCost: getVal('packagingMonthlySupplyCost'),
         cateringStaffPerEventCost: getVal('cateringStaffPerEventCost'), deliveryMonthlyCost: getVal('deliveryMonthlyCost'),
-        monthlyTransportCost: getVal('monthlyTransportCost'), meatDemandSheepMonthly: getVal('meatDemandSheepMonthly'),
+        monthlyTransportCost: getVal('monthlyTransportCost'), meatDemandSheepMonthlyDisplay: getVal('meatDemandSheepMonthly'), 
         liveAnimalSalesMonthly: getVal('liveAnimalSalesMonthly'), cateringEventsMonthly: getVal('cateringEventsMonthly'),
         cateringPeoplePerEvent: getVal('cateringPeoplePerEvent'), eventRentalsMonthly: getVal('eventRentalsMonthly'),
         exportSheepMonthly: getVal('exportSheepMonthly'), manureProductionAnnualTonnes: getVal('manureProductionAnnualTonnes'),
+        meatYieldPercentInput: getVal('meatYieldPercentInput') || 50,
+        percentMalesForUdheyaInput: getVal('percentMalesForUdheyaInput') || 80,
         fertilityRatePercent: getVal('fertilityRatePercent'), birthsPerEwePerYear: getVal('birthsPerEwePerYear'),
         avgOffspringPerBirth: getVal('avgOffspringPerBirth'), maleRatioPercent: getVal('maleRatioPercent'),
         twinRatePercent: getVal('twinRatePercent'), firstBirthAgeMonths: getVal('firstBirthAgeMonths'),
@@ -355,26 +395,36 @@ function calculateAllFinancials(fromFAB = false) {
 
     try {
         const flockPurchaseCost = (i.initialEwes * i.purchaseEwePrice) + (i.initialRams * i.purchaseRamPrice) + (i.improvedRamsCountUsed * i.improvedRamPurchaseCost);
+        let landCostInitial = (i.landTenureType === 'owned') ? i.landPurchasePriceInput : 0;
         const buildingCosts = i.shelterConstructionCost + i.fencingCost + i.coveredBarnsCost + i.openBarnsCost + i.birthingRoomsCost + i.vetClinicCost + i.feedStorageShedCost;
         const equipmentCosts = i.waterSystemCost + i.feedingEquipmentCost + i.refrigeratorsCost + i.freezersCost + i.biogasSystemCost + i.waterRecyclingSystemCost + i.packagingEquipmentCost + i.barnCoolingSystemsCost + i.otherMiscellaneousEquipmentCost;
         const cateringCapitalCosts = i.cateringGrillsCost + i.cateringFurnitureCost + i.cateringServingWareCost + i.portableGeneratorCost + i.productPhotographyCost;
         const vehiclePurchaseCosts = i.standardVehicleCost + i.refrigeratedVehicleCost;
         const techSetupCosts = i.websiteDevelopmentCost + i.mobileAppDevelopmentCost + i.paymentGatewaySetupCost + i.inventorySystemCost;
         const initialCertificationCosts = i.exportCertificatesCostAnnual + i.isoCertificateCostAnnual;
-        const totalFixedAssets = buildingCosts + equipmentCosts + cateringCapitalCosts + vehiclePurchaseCosts + techSetupCosts + initialCertificationCosts;
+        const totalDepreciableAssets = buildingCosts + equipmentCosts + cateringCapitalCosts + vehiclePurchaseCosts + techSetupCosts + initialCertificationCosts;
+        const totalFixedAssets = landCostInitial + totalDepreciableAssets;
+        const annualDepreciation = i.fixedAssetsLifespanYears > 0 ? totalDepreciableAssets / i.fixedAssetsLifespanYears : 0;
         const totalAnimalsYear1 = i.initialEwes + i.initialRams + i.improvedRamsCountUsed;
         const annualLaborCost = ((i.permanentWorkersCount * i.workerMonthlySalary) + i.managerMonthlySalary) * 12;
-        const annualFeedCost = totalAnimalsYear1 * i.feedPerHeadDay * 365 * (i.feedPricePerTon / 1000);
+        let effectiveFeedPricePerTon = i.feedPricePerTon;
+        if (i.useOptimizedFeedCostToggle && currentProjectData.currentFeedMixData && currentProjectData.currentFeedMixData.totalCostPerTon > 0) { effectiveFeedPricePerTon = currentProjectData.currentFeedMixData.totalCostPerTon; setVal('feedPricePerTon', effectiveFeedPricePerTon); }
+        const annualFeedCost = totalAnimalsYear1 * i.feedPerHeadDay * 365 * (effectiveFeedPricePerTon / 1000);
         const avgDailyWaterPerHeadLiters = 8;
         const annualWaterConsumptionCubicMeters = (totalAnimalsYear1 * avgDailyWaterPerHeadLiters * 365) / 1000;
         const annualWaterDirectCost = i.waterPricePerCubicMeter > 0 ? annualWaterConsumptionCubicMeters * i.waterPricePerCubicMeter : 0;
         const annualUtilitiesCost = (i.utilitiesMonthlyCost * 12) + annualWaterDirectCost;
         const annualVetCost = (totalAnimalsYear1 * i.vaccinesCostPerHeadAnnual) + (i.vetEmergencyMonthlyBudget * 12) + (i.vetCheckupMonthlyCost * 12);
         const annualMarketingCost = (i.marketingMonthlyCost + i.digitalMarketingMonthlyCost) * 12;
-        const avgSheepWeightKg = i.sellingWeightKg; const meatYieldPercent = 0.50;
-        const sheepForMonthlyMeatDemand = (i.meatCustomersDemand > 0 && avgSheepWeightKg > 0 && meatYieldPercent > 0) ? (i.meatCustomersDemand / (avgSheepWeightKg * meatYieldPercent)) : 0;
+        const avgLiveWeightKg = i.sellingWeightKg; const meatYield = i.meatYieldPercentInput / 100;
+        const sheepForMonthlyMeatDemand = (i.meatCustomersDemand > 0 && avgLiveWeightKg > 0 && meatYield > 0) ? (i.meatCustomersDemand / (avgLiveWeightKg * meatYield)) : 0;
+        setVal('meatDemandSheepMonthly', Math.ceil(sheepForMonthlyMeatDemand));
         const annuallySlaughteredForMeat = sheepForMonthlyMeatDemand * 12;
-        const annuallySlaughteredForUdheya = i.udheyaCustomersInput * 0.8;
+        const sellableLambsPerYear = i.initialEwes * (i.fertilityRatePercent / 100) * i.birthsPerEwePerYear * i.avgOffspringPerBirth * (1 - ((i.overallMortalityRate + i.heatWaveMortalityPercent) / 100));
+        const maleLambs = sellableLambsPerYear * (i.maleRatioPercent / 100);
+        const udheyaCandidates = maleLambs * (i.percentMalesForUdheyaInput / 100);
+        const udheyaSold = Math.min(udheyaCandidates, i.udheyaCustomersInput);
+        const annuallySlaughteredForUdheya = udheyaSold * 0.8;
         const annuallySlaughteredForExport = i.exportSheepMonthly * 12 * 0.5;
         const totalAnnualSlaughtered = annuallySlaughteredForMeat + annuallySlaughteredForUdheya + annuallySlaughteredForExport;
         const annualSlaughterProcessingCost = totalAnnualSlaughtered * (i.slaughterFeePerSheep + i.processingFeePerSheep);
@@ -383,8 +433,7 @@ function calculateAllFinancials(fromFAB = false) {
         const annualDeliveryCost = i.deliveryMonthlyCost * 12;
         const annualExternalTransportCost = (i.standardVehicleCost === 0 && i.refrigeratedVehicleCost === 0) ? i.monthlyTransportCost * 12 : 0;
         const annualGeneralFees = i.annualMunicipalFees + i.annualChamberFees + i.annualProducerUnionFees + i.onlinePlatformFeesAnnual;
-        const recurringCertCosts = i.halalCertificateAnnualCost + i.qualityCertificatesAnnualCost + (i.exportCertificatesCostAnnual / 3) + (i.isoCertificateCostAnnual / 3) ;
-        const annualLicenseAndCertCostsTotal = i.licensesAnnualCost + recurringCertCosts;
+        const annualLicenseAndCertCostsTotal = i.licensesAnnualCost + i.halalCertificateAnnualCost + i.qualityCertificatesAnnualCost + i.exportCertificatesCostAnnual + i.isoCertificateCostAnnual; // All considered annual now for simplicity
         const totalAnnualOperatingCosts = annualLaborCost + annualFeedCost + annualUtilitiesCost + annualVetCost + annualMarketingCost +
                                        (i.landTenureType === 'rented' ? i.annualLandRent : 0) + i.insuranceAnnualCost +
                                        annualSlaughterProcessingCost + annualPackagingSupplyCost + annualCateringStaffCost +
@@ -394,9 +443,6 @@ function calculateAllFinancials(fromFAB = false) {
         const healthReserve = flockPurchaseCost * (i.healthEmergencyReservePercent / 100);
         const recommendedWorkingCapital = wcFromOps + i.cashReserveFixed + healthReserve;
         const finalTotalInvestment = flockPurchaseCost + totalFixedAssets + recommendedWorkingCapital;
-        const sellableLambsPerYear = i.initialEwes * (i.fertilityRatePercent / 100) * i.birthsPerEwePerYear * i.avgOffspringPerBirth * (1 - ((i.overallMortalityRate + i.heatWaveMortalityPercent) / 100));
-        const maleLambs = sellableLambsPerYear * (i.maleRatioPercent / 100);
-        const udheyaSold = Math.min(maleLambs * 0.8, i.udheyaCustomersInput);
         const udheyaRevenue = udheyaSold * i.udheyaPriceInput * (1 + i.hajjPriceIncreasePercent / 100);
         const meatRevenue = i.meatCustomersDemand * 12 * i.meatPriceInput;
         const liveAnimalsSoldTotal = i.liveAnimalSalesMonthly * 12;
@@ -408,12 +454,12 @@ function calculateAllFinancials(fromFAB = false) {
         const hidesSoldTotal = totalAnnualSlaughtered;
         const hideRevenue = hidesSoldTotal * i.hidePricePerPiece;
         const totalAnnualRevenue = udheyaRevenue + meatRevenue + liveAnimalRevenue + cateringRevenue + eventRentalRevenue + exportRevenueNet + manureRevenue + hideRevenue;
-        const grossProfit = totalAnnualRevenue - totalAnnualOperatingCosts;
+        const grossProfitBeforeDepreciation = totalAnnualRevenue - totalAnnualOperatingCosts;
         let zakatAmount = 0;
         if (i.calculateZakatToggle) { const zakatSheepCount = totalAnimalsYear1; const zakatDueSheep = zakatSheepCount >= 40 ? Math.floor(zakatSheepCount / 40) : 0; zakatAmount = zakatDueSheep * i.purchaseEwePrice; }
-        const profitBeforeTax = grossProfit - zakatAmount;
-        const incomeTaxAmount = profitBeforeTax > 0 ? profitBeforeTax * (i.incomeTaxRate / 100) : 0;
-        const netAnnualProfit = profitBeforeTax - incomeTaxAmount;
+        const taxableProfit = grossProfitBeforeDepreciation - annualDepreciation - zakatAmount;
+        const incomeTaxAmount = taxableProfit > 0 ? taxableProfit * (i.incomeTaxRate / 100) : 0;
+        const netAnnualProfit = grossProfitBeforeDepreciation - zakatAmount - incomeTaxAmount;
         const roi = finalTotalInvestment > 0 ? (netAnnualProfit / finalTotalInvestment) * 100 : 0;
         const profitMargin = totalAnnualRevenue > 0 ? (netAnnualProfit / totalAnnualRevenue) * 100 : 0;
         let paybackPeriodMonths = "N/A";
@@ -421,7 +467,7 @@ function calculateAllFinancials(fromFAB = false) {
 
         currentProjectData.calculations = {
             finalTotalInvestment, totalAnnualRevenue, totalAnnualOperatingCosts, netAnnualProfit, roi: roi || 0, profitMargin: profitMargin || 0,
-            paybackPeriodMonths, flockPurchaseCost, totalFixedAssets, recommendedWorkingCapital, grossProfit, zakatAmount, incomeTaxAmount,
+            paybackPeriodMonths, flockPurchaseCost, totalFixedAssets, totalDepreciableAssets, annualDepreciation, recommendedWorkingCapital, grossProfitBeforeDepreciation, zakatAmount, incomeTaxAmount,
             udheyaRevenue, meatRevenue, liveAnimalRevenue, cateringRevenue, eventRentalRevenue, exportRevenue: exportRevenueNet,
             byproductsRevenue: manureRevenue + hideRevenue, buildingCosts, equipmentCosts, cateringCapitalCosts, vehiclePurchaseCosts, techSetupCosts, initialCertificationCosts
         };
@@ -467,15 +513,16 @@ function calculateAllFinancials(fromFAB = false) {
         if (!isInitialAppLoad) { showAppNotification('تم تحديث الحسابات ✓', 'success'); if (fromFAB && currentSectionId !== 'financial') { setTimeout(() => navigateToSection('financial'), 300); } }
         isInitialAppLoad = false;
     } catch (error) { console.error('Error in calculateAllFinancials:', error, error.stack); showAppNotification('خطأ في الحسابات. تحقق من المدخلات.', 'error'); }
+    finally { toggleLoading(false); }
 }
 
 function handleSectionSpecificLogic(sectionId, forceRefresh = false) {
     if (forceRefresh || sectionId === 'financial') createMainFinancialCharts();
     if (forceRefresh || sectionId === 'seasonal') createSeasonalAnalysisCharts();
     if (forceRefresh || sectionId === 'multiyear') calculateAndDisplayMultiYearProjections();
-    if (sectionId === 'feedOptimizer') { if(forceRefresh || !appCharts.feedMixComposition) optimizeFeedMix(); createFeedMixCompositionChart(); }
+    if (sectionId === 'feedOptimizer') { if(forceRefresh || !appCharts.feedMixComposition || !currentProjectData.currentFeedMixData.mix ) optimizeFeedMix(); createFeedMixCompositionChart(); }
     if (sectionId === 'breedingCalendar') { if(forceRefresh || !appCharts.monthlyProduction || !currentProjectData.breedingEventsData) generateBreedingSchedule(); createMonthlyProductionChart(); }
-    if (sectionId === 'sensitivity') { if(forceRefresh || !appCharts.tornadoSensitivity) { runFullSensitivityAnalysis(); createSensitivityVisuals(); }}
+    if (sectionId === 'sensitivity') { if(forceRefresh || !appCharts.tornadoSensitivity) { runFullSensitivityAnalysis(); } createSensitivityVisuals(); }
     if (sectionId === 'marketIntel') createMarketIntelligenceCharts();
     if (sectionId === 'compliance') updateComplianceOverview();
     if (sectionId === 'operationalTools') { createOperationalKPIChart(); }
@@ -518,7 +565,7 @@ function createMainFinancialCharts() {
     destroyChart('mainCostBreakdown');
     const mcbCtx = document.getElementById('mainCostBreakdownChart')?.getContext('2d');
     if (mcbCtx) {
-        appCharts.mainCostBreakdown = new Chart(mcbCtx, { type: 'pie', data: { labels: ['شراء القطيع', 'أصول ثابتة', 'رأس مال عامل', 'تشغيل سنوي'], datasets: [{ data: [calc.flockPurchaseCost || 0, calc.totalFixedAssets || 0, calc.recommendedWorkingCapital || 0, calc.totalAnnualOperatingCosts || 0], backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#4facfe'], borderColor: '#fff', borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, title:{display:true, text:'توزيع هيكل التكاليف والاستثمار'}, tooltip: { callbacks: { label: function(context) { let label = context.label || ''; if (label) { label += ': '; } if (context.parsed !== null) { label += formatCurrency(context.parsed, false, true) + ' ج.م'; } return label; }}}}} });
+        appCharts.mainCostBreakdown = new Chart(mcbCtx, { type: 'pie', data: { labels: ['شراء القطيع', 'أصول ثابتة', 'رأس مال عامل', 'تشغيل سنوي'], datasets: [{ data: [calc.flockPurchaseCost || 0, calc.totalFixedAssets || 0, calc.recommendedWorkingCapital || 0, calc.totalAnnualOperatingCosts || 0], backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#4facfe'], borderColor: '#fff', borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, title:{display:true, text:'توزيع هيكل التكاليف والاستثمار'}, tooltip: { callbacks: { label: function(context) { let label = context.label || ''; if (label) { label += ': '; } if (context.parsed !== null) { label += formatCurrency(context.parsed, false, false) ; } return label; }}}}} });
     }
 }
 
@@ -593,11 +640,28 @@ function calculateAndDisplayMultiYearProjections() {
 }
 
 function optimizeFeedMix() {
-    const i = currentProjectData.inputs; if(!i || Object.keys(i).length === 0) return; const proteinReq = i.feedRequiredProtein; const energyReq = i.feedRequiredEnergy;
-    let formulaHTML = `<h4>متطلبات الخلطة:</h4> <p>بروتين خام: ${proteinReq}% | طاقة: ${energyReq} ميجا كالوري/كجم | ألياف قصوى: ${i.feedMaxFiber}%</p> <p class="alert-info">ملاحظة: هذا مثال توضيحي لخلطة شائعة، وليس حسابًا ديناميكيًا دقيقًا.</p> <p><strong>مثال لخلطة تسمين (قيم تقريبية):</strong></p> <ul style="padding-right:20px;"> <li>ذرة صفراء: 50% (سعر الطن: ${formatCurrency(i.feedCornPriceTon, false, false)})</li> <li>كسب فول صويا: 20% (سعر الطن: ${formatCurrency(i.feedSoybeanPriceTon, false, false)})</li> <li>نخالة قمح: 15% (سعر الطن: ${formatCurrency(i.feedWheatBranPriceTon, false, false)})</li> <li>شعير: 10% (سعر الطن: ${formatCurrency(i.feedBarleyPriceTon, false, false)})</li> <li>علف مركز: 5% (سعر الطن: ${formatCurrency(i.feedConcentratePriceTon, false, false)})</li> </ul>`;
+    const i = currentProjectData.inputs; if(!i || Object.keys(i).length === 0) {
+        setContent('optimizedFeedResults', '<p class="alert-info">يرجى إدخال بيانات المشروع أولاً.</p>');
+        createFeedMixCompositionChart(); return;
+    }
+    const proteinReq = i.feedRequiredProtein; const energyReq = i.feedRequiredEnergy;
     const exampleMix = { feedCornPriceTon: 50, feedSoybeanPriceTon: 20, feedWheatBranPriceTon: 15, feedBarleyPriceTon: 10, feedConcentratePriceTon: 5 };
-    currentProjectData.currentFeedMixData = { mix: exampleMix };
+    let totalCostPerTonExample = 0; let calculatedProtein = 0; let calculatedEnergy = 0; let calculatedFiber = 0;
+    const feedsData = { feedCornPriceTon: { name: 'ذرة صفراء', price: i.feedCornPriceTon, protein: 8, energy: 3.2, fiber: 2 }, feedSoybeanPriceTon: { name: 'كسب فول صويا', price: i.feedSoybeanPriceTon, protein: 44, energy: 2.2, fiber: 6 }, feedWheatBranPriceTon: { name: 'نخالة قمح', price: i.feedWheatBranPriceTon, protein: 15, energy: 2.0, fiber: 12 }, feedBarleyPriceTon: { name: 'شعير', price: i.feedBarleyPriceTon, protein: 11, energy: 2.8, fiber: 5 }, feedConcentratePriceTon: { name: 'علف مركز', price: i.feedConcentratePriceTon, protein: 18, energy: 2.7, fiber: 8 }, feedAlfalfaPriceTon: { name: 'دريس برسيم', price: i.feedAlfalfaPriceTon, protein: 17, energy: 2.2, fiber: 28 } };
+    let formulaHTML = `<h4>متطلبات الخلطة:</h4> <p>بروتين خام: ${proteinReq}% | طاقة: ${energyReq} ميجا كالوري/كجم | ألياف قصوى: ${i.feedMaxFiber}%</p> <p class="alert-info">ملاحظة: هذا مثال توضيحي لخلطة شائعة، وليس حسابًا ديناميكيًا دقيقًا.</p> <p><strong>مثال لخلطة تسمين (قيم تقريبية):</strong></p> <ul style="padding-right:20px;">`;
+    for (const [feedId, percent] of Object.entries(exampleMix)) {
+        const feedInfo = feedsData[feedId];
+        if (feedInfo) {
+            formulaHTML += `<li>${feedInfo.name}: ${percent}% (سعر الطن: ${formatCurrency(feedInfo.price, false, false)})</li>`;
+            totalCostPerTonExample += (percent / 100) * feedInfo.price; calculatedProtein += (percent / 100) * feedInfo.protein;
+            calculatedEnergy += (percent / 100) * feedInfo.energy; calculatedFiber += (percent / 100) * feedInfo.fiber;
+        }
+    }
+    formulaHTML += `</ul> <hr> <p><strong>إجمالي البروتين للمثال:</strong> ${calculatedProtein.toFixed(1)}%</p> <p><strong>إجمالي الطاقة للمثال:</strong> ${calculatedEnergy.toFixed(1)} MJ</p> <p><strong>إجمالي الألياف للمثال:</strong> ${calculatedFiber.toFixed(1)}%</p> <p><strong>التكلفة/طن للمثال:</strong> ${formatCurrency(totalCostPerTonExample, false, false)}</p>`;
+    currentProjectData.currentFeedMixData = { mix: exampleMix, totalCostPerTon: totalCostPerTonExample, protein: calculatedProtein, energy: calculatedEnergy, fiber: calculatedFiber };
     setContent('optimizedFeedResults', formulaHTML); createFeedMixCompositionChart();
+    const useOptimizedCostToggleField = document.getElementById('useOptimizedFeedCostToggleField');
+    if (useOptimizedCostToggleField) useOptimizedCostToggleField.style.display = 'block';
 }
 
 function createFeedMixCompositionChart() {
@@ -612,7 +676,7 @@ function createFeedMixCompositionChart() {
 }
 
 function generateBreedingSchedule() {
-    const i = currentProjectData.inputs; if(!i || Object.keys(i).length === 0) return;
+    const i = currentProjectData.inputs; if(!i || Object.keys(i).length === 0) { setContent('breedingEventsDisplay', '<p class="alert-info">يرجى إدخال بيانات المشروع أولاً.</p>'); createMonthlyProductionChart(); return;}
     const season1StartDateVal = getStrVal('breedingSeason1StartDate');
     const season1Start = season1StartDateVal ? new Date(season1StartDateVal) : new Date(new Date().getFullYear() + '-09-01');
     const season2StartInput = getStrVal('breedingSeason2StartDate');
@@ -647,35 +711,39 @@ function createMonthlyProductionChart() {
 }
 
 function runFullSensitivityAnalysis() {
-    const calc = currentProjectData.calculations; const inputs = currentProjectData.inputs; if (!calc || !inputs) { showAppNotification("يرجى حساب التحليل المالي الأساسي أولاً.", "warn"); return; }
-    const baseProfit = calc.netAnnualProfit;
-    const originalInputsSnapshot = JSON.parse(JSON.stringify(inputs));
-    const factorsToVary = [ { name: 'سعر الأضحية', inputId: 'udheyaPriceInput', variationId: 'sensitivityPriceVariation' }, { name: 'سعر طن العلف', inputId: 'feedPricePerTon', variationId: 'sensitivityFeedCostVariation' }, { name: 'معدل ولادات/نعجة', inputId: 'birthsPerEwePerYear', variationId: 'sensitivityBirthRateVariation' }, { name: 'نسبة النفوق (%)', inputId: 'overallMortalityRate', variationId: 'sensitivityMortalityVariation' }, { name: 'عملاء الأضاحي', inputId: 'udheyaCustomersInput', variationId: 'sensitivityDemandVariation' } ];
-    const sensitivityResults = [];
-    factorsToVary.forEach(factor => {
-        const baseValue = originalInputsSnapshot[factor.inputId]; const variationPercent = getVal(factor.variationId) / 100;
-        let highTestValue = baseValue * (1 + variationPercent); let lowTestValue = baseValue * (1 - variationPercent);
-        if (factor.inputId === 'overallMortalityRate') { highTestValue = Math.min(100, baseValue * (1 + variationPercent)); lowTestValue = Math.max(0, baseValue * (1 - variationPercent)); }
-        setVal(factor.inputId, highTestValue); calculateAllFinancials(); const profitHigh = currentProjectData.calculations.netAnnualProfit;
-        setVal(factor.inputId, lowTestValue); calculateAllFinancials(); const profitLow = currentProjectData.calculations.netAnnualProfit;
-        sensitivityResults.push({ variable: factor.name, impactLow: profitLow - baseProfit, impactHigh: profitHigh - baseProfit, totalSwing: profitHigh - profitLow });
-        setVal(factor.inputId, baseValue);
-    });
-    calculateAllFinancials();
-    const mcRuns = getVal('monteCarloSimulationRuns'); const mcProfits = [];
-    for (let k = 0; k < mcRuns; k++) {
+    toggleLoading(true);
+    setTimeout(() => {
+        const calc = currentProjectData.calculations; const inputs = currentProjectData.inputs; if (!calc || !inputs) { showAppNotification("يرجى حساب التحليل المالي الأساسي أولاً.", "warn"); toggleLoading(false); return; }
+        const baseProfit = calc.netAnnualProfit;
+        const originalInputsSnapshot = JSON.parse(JSON.stringify(inputs));
+        const factorsToVary = [ { name: 'سعر الأضحية', inputId: 'udheyaPriceInput', variationId: 'sensitivityPriceVariation' }, { name: 'سعر طن العلف', inputId: 'feedPricePerTon', variationId: 'sensitivityFeedCostVariation' }, { name: 'معدل ولادات/نعجة', inputId: 'birthsPerEwePerYear', variationId: 'sensitivityBirthRateVariation' }, { name: 'نسبة النفوق (%)', inputId: 'overallMortalityRate', variationId: 'sensitivityMortalityVariation' }, { name: 'عملاء الأضاحي', inputId: 'udheyaCustomersInput', variationId: 'sensitivityDemandVariation' } ];
+        const sensitivityResults = [];
         factorsToVary.forEach(factor => {
             const baseValue = originalInputsSnapshot[factor.inputId]; const variationPercent = getVal(factor.variationId) / 100;
-            const randomFactor = 1 + (Math.random() - 0.5) * 2 * variationPercent; let variedValue = baseValue * randomFactor;
-            if (factor.inputId === 'overallMortalityRate') variedValue = Math.max(0, Math.min(100, variedValue));
-            setVal(factor.inputId, variedValue);
+            let highTestValue = baseValue * (1 + variationPercent); let lowTestValue = baseValue * (1 - variationPercent);
+            if (factor.inputId === 'overallMortalityRate') { highTestValue = Math.min(100, baseValue * (1 + variationPercent)); lowTestValue = Math.max(0, baseValue * (1 - variationPercent)); }
+            setVal(factor.inputId, highTestValue); calculateAllFinancials(); const profitHigh = currentProjectData.calculations.netAnnualProfit;
+            setVal(factor.inputId, lowTestValue); calculateAllFinancials(); const profitLow = currentProjectData.calculations.netAnnualProfit;
+            sensitivityResults.push({ variable: factor.name, impactLow: profitLow - baseProfit, impactHigh: profitHigh - baseProfit, totalSwing: profitHigh - profitLow });
+            setVal(factor.inputId, baseValue);
         });
-        calculateAllFinancials(); mcProfits.push(currentProjectData.calculations.netAnnualProfit);
-    }
-    Object.entries(originalInputsSnapshot).forEach(([id, val]) => setVal(id, val)); calculateAllFinancials();
-    currentProjectData.sensitivityAnalysisData = { tornado: sensitivityResults, monteCarlo: mcProfits };
-    createSensitivityVisuals(); displayRiskAssessmentSummary(mcProfits, baseProfit);
-    showAppNotification("تم إجراء تحليل الحساسية ومونت كارلو.", "success");
+        calculateAllFinancials();
+        const mcRuns = getVal('monteCarloSimulationRuns'); const mcProfits = [];
+        for (let k = 0; k < mcRuns; k++) {
+            factorsToVary.forEach(factor => {
+                const baseValue = originalInputsSnapshot[factor.inputId]; const variationPercent = getVal(factor.variationId) / 100;
+                const randomFactor = 1 + (Math.random() - 0.5) * 2 * variationPercent; let variedValue = baseValue * randomFactor;
+                if (factor.inputId === 'overallMortalityRate') variedValue = Math.max(0, Math.min(100, variedValue));
+                setVal(factor.inputId, variedValue);
+            });
+            calculateAllFinancials(); mcProfits.push(currentProjectData.calculations.netAnnualProfit);
+        }
+        Object.entries(originalInputsSnapshot).forEach(([id, val]) => setVal(id, val)); calculateAllFinancials();
+        currentProjectData.sensitivityAnalysisData = { tornado: sensitivityResults, monteCarlo: mcProfits };
+        createSensitivityVisuals(); displayRiskAssessmentSummary(mcProfits, baseProfit);
+        toggleLoading(false);
+        showAppNotification("تم إجراء تحليل الحساسية ومونت كارلو.", "success");
+    }, 50);
 }
 
 function createSensitivityVisuals() {
@@ -727,18 +795,50 @@ function createMarketIntelligenceCharts() {
     }
 }
 
+function initializeComplianceData() {
+    currentProjectData.complianceData = {
+        complianceBusinessLicense: { name: 'رخصة مزاولة النشاط / سجل تجاري', cost: 2000, renewal: 'سنوي', checked: getVal('complianceBusinessLicense', true) },
+        complianceTaxRegistration: { name: 'البطاقة الضريبية والتسجيل الضريبي', cost: 500, renewal: 'مرة واحدة', checked: getVal('complianceTaxRegistration', true) },
+        complianceHealthCertificate: { name: 'شهادة صحية بيطرية للمزرعة', cost: 3000, renewal: 'سنوي', checked: getVal('complianceHealthCertificate', true) },
+        complianceHalalCertificate: { name: 'شهادة الذبح الحلال', cost: 15000, renewal: 'سنوي', checked: getVal('complianceHalalCertificate', true) },
+        complianceEnvironmentalPermit: { name: 'تصريح بيئي', cost: 8000, renewal: '3 سنوات', checked: getVal('complianceEnvironmentalPermit', true) },
+        complianceISOCertificate: { name: 'شهادة ISO 22000', cost: 50000, renewal: '3 سنوات', checked: getVal('complianceISOCertificate', true) }
+    };
+}
+
 function updateComplianceOverview() {
-    const checkboxes = [ 'complianceBusinessLicense', 'complianceTaxRegistration', 'complianceHealthCertificate', 'complianceHalalCertificate', 'complianceEnvironmentalPermit', 'complianceISOCertificate' ];
-    const totalChecks = checkboxes.length; let checkedCount = 0;
-    checkboxes.forEach(id => { if (getVal(id, true)) checkedCount++; });
+    let checkedCount = 0;
+    const checkboxes = document.querySelectorAll('#compliance .input-label input[type="checkbox"]');
+    const totalChecks = checkboxes.length;
+
+    checkboxes.forEach(cb => {
+        if (cb.checked) checkedCount++;
+        if(currentProjectData.complianceData[cb.id]) { currentProjectData.complianceData[cb.id].checked = cb.checked; }
+    });
+
     const completionRate = totalChecks > 0 ? (checkedCount / totalChecks) * 100 : 0;
     const progressFillEl = document.getElementById('mainComplianceProgressFill');
     if(progressFillEl) progressFillEl.style.width = completionRate.toFixed(0) + '%';
     setContent('mainCompliancePercent', completionRate.toFixed(0));
+
     destroyChart('mainCompliance');
     const mcCtx = document.getElementById('mainComplianceChart')?.getContext('2d');
-    if (mcCtx) { appCharts.mainCompliance = new Chart(mcCtx, { type: 'doughnut', data: { labels: ['مكتمل', 'متبقي'], datasets: [{ data: [checkedCount, totalChecks - checkedCount], backgroundColor: ['#4CAF50', '#F44336'], borderColor:'#fff', borderWidth:2}]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, title:{display:true, text:'حالة استيفاء التراخيص الأساسية'} }} }); }
-    setContent('complianceDocumentDetails', `<p class="alert-info">يتم تتبع حالة ${totalChecks} التزامًا رئيسيًا. التكاليف وفترات التجديد تحتاج لإدخال يدوي أو نظام أكثر تفصيلاً.</p>`);
+    if (mcCtx) {
+        appCharts.mainCompliance = new Chart(mcCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['مكتمل', 'متبقي'],
+                datasets: [{ data: [checkedCount, totalChecks - checkedCount], backgroundColor: ['#4CAF50', '#F44336'], borderColor:'#fff', borderWidth:2}]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, title:{display:true, text:'حالة استيفاء التراخيص الأساسية'} }}
+        });
+    }
+    let detailsHTML = '<ul style="list-style-type: none; padding: 0;">';
+    Object.values(currentProjectData.complianceData).forEach(doc => {
+        detailsHTML += `<li style="padding: 5px 0; border-bottom: 1px solid #eee;">${doc.name} - التكلفة التقديرية: ${formatCurrency(doc.cost,false,true)} (${doc.renewal}) - ${doc.checked ? "<span style='color:green;'><strong>✓</strong></span>" : "<span style='color:red;'>✗</span>"}</li>`;
+    });
+    detailsHTML += '</ul>';
+    setContent('complianceDocumentDetails', detailsHTML);
 }
 
 function setComplianceReminder() {
@@ -856,7 +956,7 @@ function loadProjectData(event) {
 function generateAndShowDetailedReport() {
     const calc = currentProjectData.calculations; const inputs = currentProjectData.inputs; if (!calc || !inputs) { showAppNotification("يرجى إجراء الحسابات أولاً.", "warn"); return; }
     let reportHTML = `<div style="padding:10px;"> <h4 style="color:#667eea; border-bottom:1px solid #eee; padding-bottom:5px;">الملخص المالي:</h4> <table id="detailedReportTable"> <tr><td>إجمالي الاستثمار:</td><td>${formatCurrency(calc.finalTotalInvestment)}</td></tr> <tr><td>الإيرادات السنوية:</td><td>${formatCurrency(calc.totalAnnualRevenue)}</td></tr> <tr><td>التكاليف التشغيلية السنوية:</td><td>${formatCurrency(calc.totalAnnualOperatingCosts)}</td></tr> <tr><td>الربح الصافي السنوي:</td><td>${formatCurrency(calc.netAnnualProfit)}</td></tr> <tr><td>العائد على الاستثمار (ROI):</td><td>${(calc.roi || 0).toFixed(1)}%</td></tr> <tr><td>فترة الاسترداد:</td><td>${calc.paybackPeriodMonths !== "N/A" ? calc.paybackPeriodMonths + ' شهر' : 'غير محدد'}</td></tr> </table>`;
-    reportHTML += `<h4 style="color:#667eea; border-bottom:1px solid #eee; padding-bottom:5px; margin-top:15px;">توزيع الاستثمار:</h4> <table id="detailedReportTable"> <tr><td>شراء القطيع:</td><td>${formatCurrency(calc.flockPurchaseCost)}</td></tr> <tr><td>أصول ثابتة:</td><td>${formatCurrency(calc.totalFixedAssets)}</td></tr> <tr><td>رأس المال العامل:</td><td>${formatCurrency(calc.recommendedWorkingCapital)}</td></tr> </table>`;
+    reportHTML += `<h4 style="color:#667eea; border-bottom:1px solid #eee; padding-bottom:5px; margin-top:15px;">توزيع الاستثمار:</h4> <table id="detailedReportTable"> <tr><td>شراء القطيع:</td><td>${formatCurrency(calc.flockPurchaseCost)}</td></tr> <tr><td>أصول ثابتة:</td><td>${formatCurrency(calc.totalFixedAssets)}</td></tr> <tr><td>رأس المال العامل:</td><td>${formatCurrency(calc.recommendedWorkingCapital)}</td></tr><tr><td>إهلاك سنوي للأصول:</td><td>${formatCurrency(calc.annualDepreciation)}</td></tr></table>`;
     reportHTML += `<h4 style="color:#667eea; border-bottom:1px solid #eee; padding-bottom:5px; margin-top:15px;">تفاصيل الإيرادات:</h4> <table id="detailedReportTable"> <tr><td>الأضاحي:</td><td>${formatCurrency(calc.udheyaRevenue)}</td></tr> <tr><td>اللحوم:</td><td>${formatCurrency(calc.meatRevenue)}</td></tr> <tr><td>حيوانات حية:</td><td>${formatCurrency(calc.liveAnimalRevenue)}</td></tr> <tr><td>كاترينج:</td><td>${formatCurrency(calc.cateringRevenue)}</td></tr> <tr><td>تأجير:</td><td>${formatCurrency(calc.eventRentalRevenue)}</td></tr> <tr><td>تصدير:</td><td>${formatCurrency(calc.exportRevenue)}</td></tr> <tr><td>منتجات ثانوية:</td><td>${formatCurrency(calc.byproductsRevenue)}</td></tr> </table>`;
     const proj = currentProjectData.multiYearProjections;
     if (proj && proj.years && proj.years.length > 0) {
@@ -872,6 +972,7 @@ function generateAndShowDetailedReport() {
         const sortedMC = [...mcResultsForReport].sort((a,b) => a - b); const p5 = sortedMC[Math.floor(sortedMC.length * 0.05)]; const p95 = sortedMC[Math.floor(sortedMC.length * 0.95)];
         reportHTML += `<h4 style="color:#667eea; border-bottom:1px solid #eee; padding-bottom:5px; margin-top:15px;">ملخص تقييم المخاطر:</h4> <table id="detailedReportTable"> <tr><td>احتمالية الربح:</td><td>${profitabilityPercent.toFixed(1)}%</td></tr> <tr><td>متوسط الربح (مونت كارلو):</td><td>${formatCurrency(meanProfit)}</td></tr> <tr><td>نطاق الربح (90%):</td><td>من ${formatCurrency(p5)} إلى ${formatCurrency(p95)}</td></tr> </table>`;
     }
+    reportHTML += `<h4 style="color:#667eea; border-bottom:1px solid #eee; padding-bottom:5px; margin-top:15px;">الافتراضات الرئيسية:</h4><ul style="font-size:0.9em; padding-right:20px; list-style-type: disc;"><li>نسبة العائد على اللحم (Yield): ${inputs.meatYieldPercentInput}%</li><li>نسبة الذكور الموجهة للأضاحي: ${inputs.percentMalesForUdheyaInput}%</li><li>عمر الأصول القابلة للإهلاك: ${inputs.fixedAssetsLifespanYears} سنوات (طريقة القسط الثابت)</li><li>الزكاة حسبت على أساس سعر النعاج للعدد المستحق.</li><li>التوزيع الموسمي للإيرادات تقديري.</li></ul>`;
     reportHTML += `</div>`; setContent('detailedReportContentContainer', reportHTML);
     showBottomSheet('detailedReport'); if(document.getElementById('menuSheet').classList.contains('active')) hideBottomSheet('menu');
 }
@@ -883,20 +984,24 @@ async function exportReportToPDF() {
     doc.setFont('helvetica'); doc.setR2L(true); const pageWidth = doc.internal.pageSize.getWidth(); const margin = 15; let yPos = 20;
     doc.setFontSize(18); doc.text('تقرير جدوى مشروع تربية الأغنام', pageWidth / 2, yPos, { align: 'center' }); yPos += 10;
     doc.setFontSize(10); doc.text(`تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG')}`, pageWidth - margin, yPos, { align: 'right'}); yPos += 10;
-    const addSectionToPdf = (title, dataArray) => {
-        if (yPos > doc.internal.pageSize.getHeight() - (dataArray.length * 10 + 20) ) { doc.addPage(); yPos = 20; }
+    const autoTableStyles = { font: 'helvetica', halign: 'right', cellPadding: 2, fontSize: 9, minCellHeight: 7, fontStyle:'normal' };
+    const autoTableHeadStyles = { fillColor: [60, 80, 150], textColor: 255, halign: 'center', fontStyle: 'bold' };
+    const addSectionToPdf = (title, dataArray, head = [['البيان', 'القيمة']]) => {
+        const tableHeightEstimate = dataArray.length * 8 + 10;
+        if (yPos + tableHeightEstimate > doc.internal.pageSize.getHeight() - margin) { doc.addPage(); yPos = 20; }
         doc.setFontSize(14); doc.text(title, pageWidth - margin , yPos, {align: 'right'}); yPos += 6;
-        doc.autoTable({ startY: yPos, head: [['البيان', 'القيمة']], body: dataArray, theme: 'grid', styles: { font: 'helvetica', halign: 'right', cellPadding: 2, fontSize: 9, minCellHeight: 7, fontStyle:'normal' }, headStyles: { fillColor: [60, 80, 150], textColor: 255, halign: 'center', fontStyle: 'bold' }, columnStyles: { 0: { halign: 'right', cellWidth: pageWidth/2.5 }, 1: { halign: 'left', cellWidth: 'auto'} }, margin: { right: margin, left: margin } });
+        doc.autoTable({ startY: yPos, head: head, body: dataArray, theme: 'grid', styles: autoTableStyles, headStyles: autoTableHeadStyles, columnStyles: { 0: { halign: 'right', cellWidth: pageWidth/2.5 }, 1: { halign: 'left', cellWidth: 'auto'} }, margin: { right: margin, left: margin } });
         yPos = doc.autoTable.previous.finalY + 8;
     };
-    addSectionToPdf('الملخص المالي الرئيسي', [ ['إجمالي الاستثمار', `${formatCurrency(calc.finalTotalInvestment,false,true)} ج.م`], ['الإيرادات السنوية', `${formatCurrency(calc.totalAnnualRevenue,false,true)} ج.م`], ['التكاليف التشغيلية', `${formatCurrency(calc.totalAnnualOperatingCosts,false,true)} ج.م`], ['الربح الصافي', `${formatCurrency(calc.netAnnualProfit,false,true)} ج.م`], ['ROI', `${(calc.roi || 0).toFixed(1)}%`], ['فترة الاسترداد', `${calc.paybackPeriodMonths} شهر`] ]);
+    addSectionToPdf('الملخص المالي الرئيسي', [ ['إجمالي الاستثمار', `${formatCurrency(calc.finalTotalInvestment,false,true)} ج.م`], ['الإيرادات السنوية', `${formatCurrency(calc.totalAnnualRevenue,false,true)} ج.م`], ['التكاليف التشغيلية', `${formatCurrency(calc.totalAnnualOperatingCosts,false,true)} ج.م`], ['الربح الصافي', `${formatCurrency(calc.netAnnualProfit,false,true)} ج.م`], ['ROI', `${(calc.roi || 0).toFixed(1)}%`], ['فترة الاسترداد', `${calc.paybackPeriodMonths !== "N/A" ? calc.paybackPeriodMonths : 'غير محدد'} شهر`] ]);
+    addSectionToPdf('توزيع الاستثمار', [ ['شراء القطيع', `${formatCurrency(calc.flockPurchaseCost, false, true)} ج.م`], ['إجمالي الأصول الثابتة', `${formatCurrency(calc.totalFixedAssets, false, true)} ج.م`], ['رأس المال العامل', `${formatCurrency(calc.recommendedWorkingCapital, false, true)} ج.م`], ['إهلاك سنوي للأصول', `${formatCurrency(calc.annualDepreciation, false, true)} ج.م`]]);
     const proj = currentProjectData.multiYearProjections;
     if (proj && proj.years.length > 0) {
-        if (yPos > doc.internal.pageSize.getHeight() - 60) { doc.addPage(); yPos = 20; }
+        if (yPos > doc.internal.pageSize.getHeight() - 70) { doc.addPage(); yPos = 20; }
         doc.setFontSize(14); doc.text('التوقعات لـ 5 سنوات', pageWidth - margin, yPos, {align: 'right'}); yPos += 6;
         const multiYearHead = [['البيان', ...proj.years.map(y => y.replace('السنة ','س'))]];
-        const multiYearBody = [ ['القطيع', ...proj.flock.map(v => formatCurrency(v,false,true))], ['الإيرادات', ...proj.revenue.map(v => formatCurrency(v,true,true))], ['الربح الصافي', ...proj.netProfit.map(v => formatCurrency(v,true,true))] ];
-        doc.autoTable({ startY: yPos, head: multiYearHead, body: multiYearBody, theme: 'striped', styles: { font: 'helvetica', fontSize: 8, cellPadding: 1.5, halign: 'center', fontStyle:'normal' }, headStyles:{fillColor:[60,80,150], textColor:255, fontStyle:'bold'}, margin:{right:margin, left:margin}});
+        const multiYearBody = [ ['القطيع', ...proj.flock.map(v => formatCurrency(v,false,true))], ['الإيرادات', ...proj.revenue.map(v => formatCurrency(v,true,true).replace(' ألف','').replace(' مليون',''))], ['الربح الصافي', ...proj.netProfit.map(v => formatCurrency(v,true,true).replace(' ألف','').replace(' مليون',''))] ];
+        doc.autoTable({ startY: yPos, head: multiYearHead, body: multiYearBody, theme: 'striped', styles: {font: 'helvetica', fontSize: 8, cellPadding: 1.5, halign: 'center', fontStyle:'normal' }, headStyles:{fillColor:[60,80,150], textColor:255, fontStyle:'bold'}, margin:{right:margin, left:margin}});
         yPos = doc.autoTable.previous.finalY + 8;
     }
     doc.save(`تقرير_مشروع_اغنام_${new Date().toISOString().slice(0,10)}.pdf`);
